@@ -158,7 +158,7 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.only(left: 16.0, right: 8),
         child: DropdownButton<String>(
           value: currentGame.id != "" ? currentGame.id : "create",
-          alignment: Alignment.centerRight,
+          alignment: Alignment.center,
           underline: Container(),
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           items: dropdownItems,
@@ -237,7 +237,7 @@ class _HomePageState extends State<HomePage> {
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
                               curve: Curves.easeOut,
-                              width: showPoints ? 90 : 0,
+                              width: showPoints ? 90 + (currentGame.players.firstWhere((p) => p.id == currentUser.id).points % 999 > 0 ? 20 : 0) : 0,
                               height: 40,
                               padding: EdgeInsets.only(left: 8, right: 16),
                               child: showPoints ? Center(child: Text("${currentGame.players.firstWhere((p) => p.id == currentUser.id).points} pts", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))) : Container(),
