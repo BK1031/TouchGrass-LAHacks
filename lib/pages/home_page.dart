@@ -142,7 +142,7 @@ class _HomePageState extends State<HomePage> {
       value: g.id,
       child: Text(g.name),
     )).toList();
-    dropdownItems.add(DropdownMenuItem(
+    dropdownItems.add(const DropdownMenuItem(
       value: "create",
       child: Row(
         children: [
@@ -160,7 +160,7 @@ class _HomePageState extends State<HomePage> {
           value: currentGame.id != "" ? currentGame.id : "create",
           alignment: Alignment.center,
           underline: Container(),
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           items: dropdownItems,
           borderRadius: BorderRadius.circular(32),
           onChanged: (item) {
@@ -181,7 +181,7 @@ class _HomePageState extends State<HomePage> {
         onTap: () {
           router.navigateTo(context, "/game/create", transition: TransitionType.cupertinoFullScreenDialog);
         },
-        child: Padding(
+        child: const Padding(
           padding: EdgeInsets.only(left: 8, top: 8, bottom: 8, right: 16),
           child: Row(
             children: [
@@ -239,8 +239,13 @@ class _HomePageState extends State<HomePage> {
                               curve: Curves.easeOut,
                               width: showPoints ? 90 + (currentGame.players.firstWhere((p) => p.id == currentUser.id).points % 999 > 0 ? 20 : 0) : 0,
                               height: 40,
-                              padding: EdgeInsets.only(left: 8, right: 16),
-                              child: showPoints ? Center(child: Text("${currentGame.players.firstWhere((p) => p.id == currentUser.id).points} pts", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))) : Container(),
+                              padding: const EdgeInsets.only(left: 8, right: 16),
+                              child: showPoints ? Center(
+                                child: Text(
+                                  "${currentGame.players.firstWhere((p) => p.id == currentUser.id).points} pts",
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+                                )
+                              ) : Container(),
                             ),
                           ],
                         ),
