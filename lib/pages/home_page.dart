@@ -85,17 +85,31 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _determinePosition() async {
-    location.onLocationChanged.listen((LocationData currentLocation) {
+    location.onLocationChanged.listen((LocationData newPosition) {
+      double delta = calculateDistance(currentPosition?.latitude ?? 0, currentPosition?.longitude?? 0, newPosition.latitude!, newPosition.longitude!);
+      log("Position update delta: ${delta}m");
       setState(() {
-        currentPosition = currentLocation;
+        currentPosition = newPosition;
       });
-      log("Current Location: ${currentPosition!.latitude}, ${currentPosition!.longitude}");
-      FirebaseFirestore.instance.collection("users/${currentUser.id}/location_history").add({
-        "lat": currentPosition!.latitude,
-        "long": currentPosition!.longitude,
-        "timestamp": DateTime.now().toUtc().toIso8601String()
+      log("Current location: ${currentPosition!.latitude}, ${currentPosition!.longitude}");
+      if (delta > 20) {
+        FirebaseFirestore.instance.collection("users/${currentUser.id}/location_history").add({
+          "lat": currentPosition!.latitude,
+          "long": currentPosition!.longitude,
+          "timestamp": DateTime.now().toUtc().toIso8601String()
+        });
+      }
+      FirebaseFirestore.instance.doc("users/${currentUser.id}").update({
+        "current_lat": currentPosition!.latitude!,
+        "current_long": currentPosition!.longitude!
       });
     });
+  }
+
+  double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    double p = 0.017453292519943295;
+    double a = 0.5 - cos((lat2 - lat1) * p)/2 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p))/2;
+    return 12742 * asin(sqrt(a)) * 1000;
   }
 
   Future<void> getGamesForPlayer() async {
@@ -127,7 +141,6 @@ class _HomePageState extends State<HomePage> {
     currentGameListener?.cancel();
     currentGameListener = FirebaseFirestore.instance.collection("games/${currentGame.id}/players").snapshots().listen((event) {
       for (int i = 0; i < event.docs.length; i++) {
-        print(event.docs[i].data());
         Player playerUpdate = Player.fromJson(event.docs[i].data());
         setState(() {
           currentGame.players[currentGame.players.indexWhere((p) => p.id == playerUpdate.id)] = playerUpdate;
