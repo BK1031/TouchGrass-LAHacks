@@ -6,6 +6,7 @@ import 'package:battleship_lahacks/utils/theme.dart';
 import 'package:battleship_lahacks/widgets/location_disabled_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cool_alert/cool_alert.dart';
+import 'package:fluro/fluro.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -88,7 +89,7 @@ class _HomePageState extends State<HomePage> {
       FirebaseFirestore.instance.collection("users/${currentUser.id}/location_history").add({
         "lat": currentPosition!.latitude,
         "long": currentPosition!.longitude,
-        "timestamp": DateTime.now()
+        "timestamp": DateTime.now().toIso8601String()
       });
     });
   }
@@ -144,7 +145,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-                    Card(
+                    joinedGames.isNotEmpty ? Card(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(512)),
                       child: InkWell(
                         onTap: () {
@@ -154,9 +155,26 @@ class _HomePageState extends State<HomePage> {
                           padding: EdgeInsets.only(left: 16, top: 8, bottom: 8, right: 8),
                           child: Row(
                             children: [
-                              Text("Bharat's Game", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                              Text(currentGame.name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
                               Padding(padding: EdgeInsets.all(2)),
                               Icon(Icons.keyboard_arrow_down_rounded)
+                            ],
+                          ),
+                        ),
+                      ),
+                    ) : Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(512)),
+                      child: InkWell(
+                        onTap: () {
+                          router.navigateTo(context, "/game/create", transition: TransitionType.cupertinoFullScreenDialog);
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.only(left: 8, top: 8, bottom: 8, right: 16),
+                          child: Row(
+                            children: [
+                              Icon(Icons.add_rounded),
+                              Padding(padding: EdgeInsets.all(2)),
+                              Text("Create a game", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
                             ],
                           ),
                         ),
