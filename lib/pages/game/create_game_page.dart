@@ -23,6 +23,8 @@ class CreateGamePage extends StatefulWidget {
 
 class _CreateGamePageState extends State<CreateGamePage> {
 
+  String state = "create";
+
   Game game = Game();
   bool startTimeEdited = false;
   bool endTimeEdited = false;
@@ -30,6 +32,8 @@ class _CreateGamePageState extends State<CreateGamePage> {
   bool showCeasefireAdd = false;
   DateTime ceasefireStart = DateTime.now().toUtc();
   DateTime ceasefireEnd = DateTime.now().toUtc();
+
+  String joinGameID = "";
 
   @override
   void initState() {
@@ -46,6 +50,7 @@ class _CreateGamePageState extends State<CreateGamePage> {
   }
 
   Future<void> createGame() async {
+    if (!endTimeEdited) return;
     if (game.name == "") {
       game.name = "${currentUser.firstName}'s Game";
     }
@@ -63,6 +68,34 @@ class _CreateGamePageState extends State<CreateGamePage> {
       joinedGames.add(game);
     });
     router.pop(context);
+  }
+
+  Future<void> joinGame() async {
+    if (joinGameID != "") {
+      QuerySnapshot result = await FirebaseFirestore.instance.collection("games").where("join_code", isEqualTo: joinGameID).get();
+      if (result.size == 1) {
+        // game exists
+        game = Game.fromJson(result.docs.first.data() as Map<String, dynamic>);
+        Player me = Player();
+        me.id = currentUser.id;
+        me.points = STARTING_POINTS;
+        game.players.add(me);
+        FirebaseFirestore.instance.doc("games/${game.id}/players/${currentUser.id}").set(me.toJson());
+        setState(() {
+          if (joinedGames.where((g) => g.id == currentGame.id).isNotEmpty) {
+            AlertService.showInfoSnackbar(context, "You are already in that game!");
+            return;
+          } else {
+            currentGame = game;
+            joinedGames.add(game);
+            AlertService.showSuccessSnackbar(context, "Joined ${game.name}!");
+          }
+        });
+        router.pop(context);
+      } else {
+        AlertService.showErrorSnackbar(context, "No game with that join code exists!");
+      }
+    }
   }
 
   @override
@@ -336,6 +369,43 @@ class _CreateGamePageState extends State<CreateGamePage> {
                 child: const Text("Create Game", style: TextStyle(color: Colors.black)),
               ),
             ),
+            Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Padding(padding: EdgeInsets.all(16.0)),
+                  const Text("——  OR  ——"),
+                  const Padding(padding: EdgeInsets.all(8.0)),
+                  TextField(
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "Enter Join Code",
+                    ),
+                    keyboardType: TextInputType.name,
+                    autocorrect: false,
+                    textCapitalization: TextCapitalization.characters,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+                    onChanged: (input) {
+                      joinGameID = input.toUpperCase();
+                    },
+                  ),
+                  const Padding(padding: EdgeInsets.all(8.0)),
+                  SizedBox(
+                    height: 50.0,
+                    width: double.infinity,
+                    child: CupertinoButton(
+                      color: ACCENT_COLOR,
+                      borderRadius: BorderRadius.circular(16),
+                      onPressed: () {
+                        joinGame();
+                      },
+                      child: const Text("Join Game", style: TextStyle(color: Colors.black)),
+                    ),
+                  ),
+                ],
+              ),
+            )
           ],
         ),
       ),
