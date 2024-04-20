@@ -47,7 +47,7 @@ type Player struct {
 	ID          string
 	Currentlat  float64
 	Currentlong float64
-	Points      int
+	Points      int64
 }
 
 type Group struct {
@@ -93,13 +93,13 @@ func (ge *GameEngine) checkPointsUpdates(app *firebase.App) {
 		}
 		for _, pdoc := range player_docs {
 			playerID := pdoc.Ref.ID
-			points, err := pdoc.DataAt("current_points")
+			points, err := pdoc.DataAt("points")
 			if err != nil {
 				log.Fatalf("Failed to fetch player data for player %s: %v", playerID, err)
 			}
 			// update the points in the game engine
 			player := ge.groups[gameID].Players[playerID]
-			player.Points = points.(int)
+			player.Points = points.(int64)
 			ge.groups[gameID].Players[playerID] = player
 		}
 	}
@@ -195,12 +195,13 @@ func NewGameEngine(app *firebase.App) *GameEngine {
 		if err != nil {
 			log.Fatalf("Failed to fetch players for group %s: %v", groupID, err)
 		}
+		group.Players = make(map[string]Player)
 		// for each player in the game, get the players data
 		for _, pdoc := range playerDocs {
 			var player Player
 			playerID := pdoc.Ref.ID
 			player.ID = playerID
-			player.Points = pdoc.Data()["current_points"].(int)
+			player.Points = pdoc.Data()["points"].(int64)
 
 			// the players data is in a different collection
 
@@ -279,7 +280,7 @@ func (ge *GameEngine) addOrUpdateMissleToFirestore(missle Missle) {
 }
 
 // Updates player points in Firestore
-func (ge *GameEngine) updatePlayerPointsInFirestore(groupID, playerID string, points int) {
+func (ge *GameEngine) updatePlayerPointsInFirestore(groupID, playerID string, points int64) {
 	client, err := ge.app.Firestore(context.Background())
 	if err != nil {
 		log.Printf("Failed to get Firestore client: %v", err)
