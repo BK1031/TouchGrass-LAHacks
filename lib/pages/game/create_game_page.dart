@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:battleship_lahacks/models/game.dart';
+import 'package:battleship_lahacks/models/player.dart';
 import 'package:battleship_lahacks/utils/alert_service.dart';
 import 'package:battleship_lahacks/utils/config.dart';
 import 'package:battleship_lahacks/utils/theme.dart';
@@ -52,12 +53,11 @@ class _CreateGamePageState extends State<CreateGamePage> {
     DocumentReference ref = await FirebaseFirestore.instance.collection("games").add(game.toJson());
     game.id = ref.id;
     FirebaseFirestore.instance.doc("games/${game.id}").update({"id": game.id});
-    FirebaseFirestore.instance.doc("games/${game.id}/players/${currentUser.id}").set({
-      "current_points": STARTING_POINTS,
-      "hits": 0,
-      "attempts": 0,
-      "join_date": DateTime.now().toUtc().toIso8601String()
-    });
+    Player me = Player();
+    me.id = currentUser.id;
+    me.points = STARTING_POINTS;
+    game.players.add(me);
+    FirebaseFirestore.instance.doc("games/${game.id}/players/${currentUser.id}").set(me.toJson());
     setState(() {
       currentGame = game;
       joinedGames.add(game);

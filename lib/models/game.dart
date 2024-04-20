@@ -1,3 +1,5 @@
+import 'package:battleship_lahacks/models/player.dart';
+
 class Game {
   String id = "";
   String name = "";
@@ -6,6 +8,7 @@ class Game {
   DateTime startTime = DateTime.now().toUtc();
   DateTime endTime = DateTime.now().toUtc();
   GameSettings settings = GameSettings();
+  List<Player> players = [];
 
   Game();
 
@@ -39,7 +42,7 @@ class GameSettings {
   GameSettings();
 
   GameSettings.fromJson(Map<String, dynamic> json) {
-    for (int i = 0; i < json["ceasefire_hours"]; i++) {
+    for (int i = 0; i < json["ceasefire_hours"].length; i++) {
       ceasefireHours.add(CeasefireHour.fromJson(json["ceasefire_hours"][i]));
     }
     stepGoal = json["step_goal"] ?? 0;

@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:battleship_lahacks/models/game.dart';
+import 'package:battleship_lahacks/models/player.dart';
 import 'package:battleship_lahacks/utils/config.dart';
 import 'package:battleship_lahacks/utils/logger.dart';
 import 'package:battleship_lahacks/utils/theme.dart';
@@ -29,6 +31,7 @@ class _HomePageState extends State<HomePage> {
   PermissionStatus _permissionGranted = PermissionStatus.denied;
 
   bool showPoints = false;
+  StreamSubscription<QuerySnapshot>? currentGameListener;
 
   @override
   void setState(fn) {
@@ -41,6 +44,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     getUserLocation();
+    getGamesForPlayer();
   }
 
   void _onMapCreated(MapboxMapController controller) {
@@ -94,6 +98,103 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Future<void> getGamesForPlayer() async {
+    QuerySnapshot gameshot = await FirebaseFirestore.instance.collection("games").get();
+    for (int i = 0; i < gameshot.size; i++) {
+      String gameID = gameshot.docs.elementAt(i).id;
+      QuerySnapshot result = await FirebaseFirestore.instance.collection("games/$gameID/players").where("id", isEqualTo: currentUser.id).get();
+      if (result.size == 1) {
+        // Player is in this game
+        Game game = Game.fromJson(gameshot.docs.elementAt(i).data() as Map<String, dynamic>);
+        // Get all players for that game
+        QuerySnapshot playershot = await FirebaseFirestore.instance.collection("games/$gameID/players").get();
+        for (int i = 0; i < playershot.size; i++) {
+          setState(() {
+            game.players.add(Player.fromJson(playershot.docs.elementAt(i).data() as Map<String, dynamic>));
+          });
+        }
+        setState(() {
+          joinedGames.add(game);
+          if (currentGame.id == "") currentGame = game;
+          showPoints = true;
+        });
+      }
+    }
+    setupListenersForCurrentGame();
+  }
+
+  Future<void> setupListenersForCurrentGame() async {
+    currentGameListener?.cancel();
+    currentGameListener = FirebaseFirestore.instance.collection("games/${currentGame.id}/players").snapshots().listen((event) {
+      for (int i = 0; i < event.docs.length; i++) {
+        print(event.docs[i].data());
+        Player playerUpdate = Player.fromJson(event.docs[i].data());
+        setState(() {
+          currentGame.players[currentGame.players.indexWhere((p) => p.id == playerUpdate.id)] = playerUpdate;
+          joinedGames.firstWhere((g) => g.id == currentGame.id).players = currentGame.players;
+        });
+      }
+    });
+  }
+
+  Widget _buildGameDropdown() {
+    List<DropdownMenuItem<String>> dropdownItems = joinedGames.map((g) => DropdownMenuItem(
+      value: g.id,
+      child: Text(g.name),
+    )).toList();
+    dropdownItems.add(DropdownMenuItem(
+      value: "create",
+      child: Row(
+        children: [
+          Icon(Icons.add_rounded),
+          Padding(padding: EdgeInsets.all(2)),
+          Text("Create or Join", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+        ],
+      ),
+    ));
+    return joinedGames.isNotEmpty ? Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(512)),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 16.0, right: 8),
+        child: DropdownButton<String>(
+          value: currentGame.id != "" ? currentGame.id : "create",
+          alignment: Alignment.centerRight,
+          underline: Container(),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          items: dropdownItems,
+          borderRadius: BorderRadius.circular(32),
+          onChanged: (item) {
+            if (item == "create") {
+              router.navigateTo(context, "/game/create", transition: TransitionType.cupertinoFullScreenDialog);
+            } else {
+              setState(() {
+                currentGame = joinedGames.firstWhere((g) => g.id == item);
+              });
+              setupListenersForCurrentGame();
+            }
+          },
+        ),
+      ),
+    ) : Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(512)),
+      child: InkWell(
+        onTap: () {
+          router.navigateTo(context, "/game/create", transition: TransitionType.cupertinoFullScreenDialog);
+        },
+        child: Padding(
+          padding: EdgeInsets.only(left: 8, top: 8, bottom: 8, right: 16),
+          child: Row(
+            children: [
+              Icon(Icons.add_rounded),
+              Padding(padding: EdgeInsets.all(2)),
+              Text("Create or Join Game", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,47 +240,13 @@ class _HomePageState extends State<HomePage> {
                               width: showPoints ? 90 : 0,
                               height: 40,
                               padding: EdgeInsets.only(left: 8, right: 16),
-                              child: showPoints ? Center(child: Text("832 pts", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))) : Container(),
+                              child: showPoints ? Center(child: Text("${currentGame.players.firstWhere((p) => p.id == currentUser.id).points} pts", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))) : Container(),
                             ),
                           ],
                         ),
                       ),
                     ),
-                    joinedGames.isNotEmpty ? Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(512)),
-                      child: InkWell(
-                        onTap: () {
-
-                        },
-                        child: Padding(
-                          padding: EdgeInsets.only(left: 16, top: 8, bottom: 8, right: 8),
-                          child: Row(
-                            children: [
-                              Text(currentGame.name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                              Padding(padding: EdgeInsets.all(2)),
-                              Icon(Icons.keyboard_arrow_down_rounded)
-                            ],
-                          ),
-                        ),
-                      ),
-                    ) : Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(512)),
-                      child: InkWell(
-                        onTap: () {
-                          router.navigateTo(context, "/game/create", transition: TransitionType.cupertinoFullScreenDialog);
-                        },
-                        child: Padding(
-                          padding: EdgeInsets.only(left: 8, top: 8, bottom: 8, right: 16),
-                          child: Row(
-                            children: [
-                              Icon(Icons.add_rounded),
-                              Padding(padding: EdgeInsets.all(2)),
-                              Text("Create a game", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                            ],
-                          ),
-                        ),
-                      ),
-                    )
+                    _buildGameDropdown()
                   ],
                 )
               ],
