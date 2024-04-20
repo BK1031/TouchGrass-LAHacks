@@ -1,3 +1,4 @@
+import 'package:battleship_lahacks/models/game.dart';
 import 'package:battleship_lahacks/models/user.dart';
 import 'package:battleship_lahacks/models/version.dart';
 import 'package:fluro/fluro.dart';
@@ -21,3 +22,8 @@ String MAPBOX_ACCESS_TOKEN = "mapbox-access-token";
 
 User currentUser = User();
 LocationData? currentPosition;
+
+Game currentGame = Game();
+List<Game> joinedGames = [];
+
+int STARTING_POINTS = 800;
