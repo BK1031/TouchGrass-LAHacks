@@ -16,6 +16,9 @@ double x = 20;
 double y1 = 700;
 double y2 = 650;
 
+double crosshairSize = 125;
+double AOE_Radius = 50;
+
 bool targeting = true;
 
 
@@ -181,13 +184,48 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          Image.asset(
-            "images/Recenter.png",
-            width: 10, // Set the width to match the image size
-            height: 10, // Set the height to match the image size
+          Center(
+            child: targeting ? // Check if targeting is true
+            CustomPaint(
+              size: Size(crosshairSize, crosshairSize),
+              painter: CirclePainter(radius: AOE_Radius),
+            ): // If targeting is false, don't display the image
+            SizedBox(), // Use SizedBox to occupy the space without displaying anything
           ),
+          Center(
+            child: targeting ? // Check if targeting is true
+            Image.asset(
+              "images/Crosshair.png",
+              width: crosshairSize, // Set the width to match the image size
+              height: crosshairSize, // Set the height to match the image size
+            ) : // If targeting is false, don't display the image
+            SizedBox(), // Use SizedBox to occupy the space without displaying anything
+          )
         ],
       ),
     );
+  }
+}
+
+
+class CirclePainter extends CustomPainter {
+  final double radius;
+
+  CirclePainter({required this.radius});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.red // Set the color of the circle here
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0; // Set the width of the circle's outline here
+
+    final center = Offset(size.width / 2, size.height / 2);
+    canvas.drawCircle(center, radius, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return false;
   }
 }
