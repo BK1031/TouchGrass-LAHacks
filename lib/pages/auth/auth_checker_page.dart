@@ -47,7 +47,7 @@ class _AuthCheckerPageState extends State<AuthCheckerPage> {
         // User is logged in
         log("[auth_checker_page] User session detected: ${user.uid}");
         await getUserInfo(user.uid);
-        router.navigateTo(context, "/", transition: TransitionType.fadeIn, replace: true, clearStack: true);
+        router.navigateTo(context, "/home", transition: TransitionType.fadeIn, replace: true, clearStack: true);
       }
     });
   }

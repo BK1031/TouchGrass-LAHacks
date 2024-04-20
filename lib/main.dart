@@ -35,7 +35,7 @@ Future<void> main() async {
 
   // ROUTE DEFINITIONS
   router.define("/", handler: Handler(handlerFunc: (BuildContext? context, Map<String, dynamic>? params) {
-    return const HomePage();
+    return const Scaffold();
   }));
 
   router.define("/check-auth", handler: Handler(handlerFunc: (BuildContext? context, Map<String, dynamic>? params) {
@@ -46,6 +46,10 @@ Future<void> main() async {
   }));
   router.define("/login", handler: Handler(handlerFunc: (BuildContext? context, Map<String, dynamic>? params) {
     return const LoginPage();
+  }));
+
+  router.define("/home", handler: Handler(handlerFunc: (BuildContext? context, Map<String, dynamic>? params) {
+    return const HomePage();
   }));
 
   runApp(MaterialApp(

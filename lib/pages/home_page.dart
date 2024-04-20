@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:battleship_lahacks/utils/config.dart';
 import 'package:battleship_lahacks/utils/logger.dart';
 import 'package:battleship_lahacks/utils/theme.dart';
+import 'package:battleship_lahacks/widgets/location_disabled_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cool_alert/cool_alert.dart';
 import 'package:flutter/foundation.dart';
@@ -94,17 +96,17 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text("Battleship"),
       ),
-      body: currentPosition?.latitude != null ? MapboxMap(
+      body: currentPosition != null ? MapboxMap(
         accessToken: kIsWeb ? MAPBOX_PUBLIC_TOKEN : MAPBOX_ACCESS_TOKEN,
         onMapCreated: _onMapCreated,
         initialCameraPosition: CameraPosition(
           target: LatLng(currentPosition!.latitude!, currentPosition!.longitude!),
           zoom: 14.0,
         ),
-        // attributionButtonMargins: const Point(-32, -32),
+        attributionButtonMargins: const Point(-32, -32),
         myLocationEnabled: true,
         dragEnabled: true,
-      ) : Container(),
+      ) : const LocationDisabledCard()
     );
   }
 }
