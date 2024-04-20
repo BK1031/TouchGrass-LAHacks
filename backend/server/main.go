@@ -111,41 +111,41 @@ func (ge *GameEngine) handleMissleRequest(c echo.Context) error {
 
 	if err := json.NewDecoder(c.Request().Body).Decode(&missleReq); err != nil {
 		return err
-	} else {
-		ge.missles[missleReq.MissleID] = Missle{
-			ID:             missleReq.MissleID,
-			Targetlat:      missleReq.TargetLat,
-			Targetlong:     missleReq.TargetLong,
-			Detonationtime: missleReq.DetonationTime,
-			SentTime:       time.Now(),
-			Radius:         missleReq.Radius,
-		}
-		//TODO: add missle to firestore
-
-		player := ge.groups[missleReq.GroupID].Players[missleReq.UserID]
-		player.Points -= 20
-		ge.groups[missleReq.GroupID].Players[missleReq.UserID] = player
-		return c.JSON(http.StatusOK, map[string]interface{}{"msg": "MISSLE FIRED"})
 	}
 
+	newMissile := Missle{
+		ID:             missleReq.MissleID,
+		Targetlat:      missleReq.TargetLat,
+		Targetlong:     missleReq.TargetLong,
+		Detonationtime: missleReq.DetonationTime,
+		SentTime:       time.Now(),
+		Radius:         missleReq.Radius,
+	}
+	ge.missles[missleReq.MissleID] = newMissile
+	ge.addOrUpdateMissleToFirestore(newMissile)
+
+	player := ge.groups[missleReq.GroupID].Players[missleReq.UserID]
+	player.Points -= 20 // Deduct points for firing a missile
+	ge.groups[missleReq.GroupID].Players[missleReq.UserID] = player
+	ge.updatePlayerPointsInFirestore(missleReq.GroupID, missleReq.UserID, player.Points)
+
+	return c.JSON(http.StatusOK, map[string]interface{}{"msg": "MISSLE FIRED"})
 }
 
 func (ge *GameEngine) checkMissleDetonation() {
-	for _, missle := range ge.missles {
-		if time.Now().After(missle.SentTime.Add(time.Duration(missle.Detonationtime) * time.Second)) {
-			for _, group := range ge.groups {
-				for _, player := range group.Players {
+	now := time.Now()
+	for missleID, missle := range ge.missles {
+		if now.After(missle.SentTime.Add(time.Duration(missle.Detonationtime) * time.Second)) {
+			for groupID, group := range ge.groups {
+				for playerID, player := range group.Players {
 					if distance(player.Currentlat, player.Currentlong, missle.Targetlat, missle.Targetlong) <= float64(missle.Radius) {
-						player.Points -= 500
-						//TODO: update points in firestore
-
-						// TODO:add hit players in firestore
+						player.Points -= 500 // Deduct points for getting hit
+						ge.groups[groupID].Players[playerID] = player
+						ge.updatePlayerPointsInFirestore(groupID, playerID, player.Points)
 					}
 				}
 			}
-			delete(ge.missles, missle.ID)
-			// TODO:delete from firestore
-
+			delete(ge.missles, missleID) // Remove the missile after detonation
 		}
 	}
 }
@@ -261,4 +261,36 @@ func getDocument(client *firestore.Client, collection string, docID string) *fir
 		return nil
 	}
 	return doc
+}
+
+// Adds or updates a missile in Firestore
+func (ge *GameEngine) addOrUpdateMissleToFirestore(missle Missle) {
+	client, err := ge.app.Firestore(context.Background())
+	if err != nil {
+		log.Printf("Failed to get Firestore client: %v", err)
+		return
+	}
+	defer client.Close()
+
+	_, err = client.Collection("missiles").Doc(missle.ID).Set(context.Background(), missle)
+	if err != nil {
+		log.Printf("Failed to add or update missile: %v", err)
+	}
+}
+
+// Updates player points in Firestore
+func (ge *GameEngine) updatePlayerPointsInFirestore(groupID, playerID string, points int) {
+	client, err := ge.app.Firestore(context.Background())
+	if err != nil {
+		log.Printf("Failed to get Firestore client: %v", err)
+		return
+	}
+	defer client.Close()
+
+	_, err = client.Collection("groups").Doc(groupID).Collection("players").Doc(playerID).Update(context.Background(), []firestore.Update{
+		{Path: "points", Value: points},
+	})
+	if err != nil {
+		log.Printf("Failed to update player points: %v", err)
+	}
 }
