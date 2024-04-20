@@ -94,18 +94,73 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Battleship"),
+        title: const Text("Battleship"),
       ),
-      body: currentPosition != null ? MapboxMap(
-        accessToken: kIsWeb ? MAPBOX_PUBLIC_TOKEN : MAPBOX_ACCESS_TOKEN,
-        onMapCreated: _onMapCreated,
-        initialCameraPosition: CameraPosition(
-          target: LatLng(currentPosition!.latitude!, currentPosition!.longitude!),
-          zoom: 14.0,
-        ),
-        attributionButtonMargins: const Point(-32, -32),
-        myLocationEnabled: true,
-        dragEnabled: true,
+      body: currentPosition != null ? Stack(
+        children: [
+          MapboxMap(
+            accessToken: kIsWeb ? MAPBOX_PUBLIC_TOKEN : MAPBOX_ACCESS_TOKEN,
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(
+              target: LatLng(currentPosition!.latitude!, currentPosition!.longitude!),
+              zoom: 14.0,
+            ),
+            attributionButtonMargins: const Point(-32, -32),
+            myLocationEnabled: true,
+            dragEnabled: true,
+          ),
+          Container(
+            // color: Colors.greenAccent,
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(512)),
+                      child: InkWell(
+                        onTap: () {
+
+                        },
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              child: Image.network(currentUser.profilePictureURL, height: 40),
+                              borderRadius: BorderRadius.circular(512),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(left: 8, right: 16),
+                              child: Text("832 pts", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(512)),
+                      child: InkWell(
+                        onTap: () {
+
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.only(left: 16, top: 8, bottom: 8, right: 8),
+                          child: Row(
+                            children: [
+                              Text("Bharat's Game", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                              Padding(padding: EdgeInsets.all(2)),
+                              Icon(Icons.keyboard_arrow_down_rounded)
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                )
+              ],
+            ),
+          ),
+        ],
       ) : const LocationDisabledCard()
     );
   }

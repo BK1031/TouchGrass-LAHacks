@@ -6,7 +6,7 @@ class User {
   String firstName = "";
   String lastName = "";
   String email = "";
-  String profilePictureURL = "https://api.dicebear.com/8.x/notionists-neutral/png?seed=Leo";
+  String profilePictureURL = "https://api.dicebear.com/8.x/notionists-neutral/png?seed=Leo&backgroundColor=c0aede,b6e3f4";
   String status = "";
 
   User();
