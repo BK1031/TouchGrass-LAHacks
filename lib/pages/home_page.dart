@@ -147,6 +147,7 @@ class _HomePageState extends State<HomePage> {
           joinedGames.firstWhere((g) => g.id == currentGame.id).players = currentGame.players;
         });
       }
+      currentGame.debugPrint();
     });
   }
 
