@@ -200,7 +200,35 @@ class _HomePageState extends State<HomePage> {
               height: crosshairSize, // Set the height to match the image size
             ) : // If targeting is false, don't display the image
             SizedBox(), // Use SizedBox to occupy the space without displaying anything
-          )
+          ),
+          SizedBox(
+            height: 750,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    targeting = false;
+                  });
+                },
+                child: targeting
+                    ? Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                  ),
+                  child: Image.asset(
+                    "images/Launch.png",
+                    width: 50,
+                    height: 50,
+                  ),
+                )
+                    : SizedBox(),
+              ),
+            ),
+          ),
         ],
       ),
     );
