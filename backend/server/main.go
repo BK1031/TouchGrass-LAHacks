@@ -200,11 +200,11 @@ func (ge *GameEngine) handleMissleRequest(c echo.Context) error {
 	}
 	fmt.Println(newMissile)
 	ge.missles[newMissile.ID] = newMissile
-	ge.addOrUpdateMissleToFirestore(newMissile) // TODO: FIx
+	ge.addOrUpdateMissleToFirestore(newMissile) 
 
 	player := ge.groups[newMissile.GroupID].Players[newMissile.UserID]
 	player.Points -= 20                                               // Deduct points for firing a missile
-	ge.groups[newMissile.GroupID].Players[newMissile.UserID] = player // TODO: FIx
+	ge.groups[newMissile.GroupID].Players[newMissile.UserID] = player 
 	ge.updatePlayerPointsInFirestore(newMissile.GroupID, newMissile.UserID, player.Points)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"msg": "MISSLE FIRED"})
