@@ -1,3 +1,4 @@
+import 'package:battleship_lahacks/models/user.dart';
 import 'package:battleship_lahacks/models/version.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/widgets.dart';
@@ -18,4 +19,5 @@ Version stableVersion = Version("1.0.0+1");
 String MAPBOX_PUBLIC_TOKEN = "mapbox-public-token";
 String MAPBOX_ACCESS_TOKEN = "mapbox-access-token";
 
+User currentUser = User();
 LocationData? currentPosition;

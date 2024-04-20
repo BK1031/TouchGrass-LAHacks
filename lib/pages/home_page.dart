@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:battleship_lahacks/utils/config.dart';
 import 'package:battleship_lahacks/utils/logger.dart';
 import 'package:battleship_lahacks/utils/theme.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cool_alert/cool_alert.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,19 @@ class _HomePageState extends State<HomePage> {
 
   bool _serviceEnabled = false;
   PermissionStatus _permissionGranted = PermissionStatus.denied;
+
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getUserLocation();
+  }
 
   void _onMapCreated(MapboxMapController controller) {
     mapController = controller;
@@ -66,13 +80,12 @@ class _HomePageState extends State<HomePage> {
         currentPosition = currentLocation;
       });
       log("Current Location: ${currentPosition!.latitude}, ${currentPosition!.longitude}");
+      FirebaseFirestore.instance.collection("users/${currentUser.id}/location_history").add({
+        "lat": currentPosition!.latitude,
+        "long": currentPosition!.longitude,
+        "timestamp": DateTime.now()
+      });
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    getUserLocation();
   }
 
   @override
@@ -81,17 +94,17 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text("Battleship"),
       ),
-      body: MapboxMap(
+      body: currentPosition?.latitude != null ? MapboxMap(
         accessToken: kIsWeb ? MAPBOX_PUBLIC_TOKEN : MAPBOX_ACCESS_TOKEN,
         onMapCreated: _onMapCreated,
-        initialCameraPosition: const CameraPosition(
-          target: LatLng(34.412278, -119.847787),
+        initialCameraPosition: CameraPosition(
+          target: LatLng(currentPosition!.latitude!, currentPosition!.longitude!),
           zoom: 14.0,
         ),
         // attributionButtonMargins: const Point(-32, -32),
         myLocationEnabled: true,
         dragEnabled: true,
-      ),
+      ) : Container(),
     );
   }
 }

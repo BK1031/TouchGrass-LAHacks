@@ -1,4 +1,7 @@
 import 'package:battleship_lahacks/firebase_options.dart';
+import 'package:battleship_lahacks/pages/auth/auth_checker_page.dart';
+import 'package:battleship_lahacks/pages/auth/login_page.dart';
+import 'package:battleship_lahacks/pages/auth/register_page.dart';
 import 'package:battleship_lahacks/pages/home_page.dart';
 import 'package:battleship_lahacks/utils/config.dart';
 import 'package:battleship_lahacks/utils/logger.dart';
@@ -35,9 +38,19 @@ Future<void> main() async {
     return const HomePage();
   }));
 
+  router.define("/check-auth", handler: Handler(handlerFunc: (BuildContext? context, Map<String, dynamic>? params) {
+    return const AuthCheckerPage();
+  }));
+  router.define("/register", handler: Handler(handlerFunc: (BuildContext? context, Map<String, dynamic>? params) {
+    return const RegisterPage();
+  }));
+  router.define("/login", handler: Handler(handlerFunc: (BuildContext? context, Map<String, dynamic>? params) {
+    return const LoginPage();
+  }));
+
   runApp(MaterialApp(
     title: "Battleship",
-    initialRoute: "/",
+    initialRoute: "/check-auth",
     onGenerateRoute: router.generator,
     theme: darkTheme,
     darkTheme: darkTheme,
