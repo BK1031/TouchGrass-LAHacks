@@ -7,6 +7,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -117,8 +118,10 @@ func NewGameEngine(app *firebase.App) *GameEngine {
 			if err != nil {
 				log.Fatalf("Failed to fetch player data for player %s: %v", playerID, err)
 			}
-			player.Currentlat = currlat.(float64)
-			player.Currentlong = currlong.(float64)
+			player.Currentlat, err = strconv.ParseFloat(fmt.Sprintf("%v", currlat), 64)
+			player.Currentlong, err = strconv.ParseFloat(fmt.Sprintf("%v", currlong), 64)
+			fmt.Println(currlat)
+			fmt.Println(currlong)
 
 			group.Players[playerID] = player
 		}
@@ -174,8 +177,10 @@ func (ge *GameEngine) checkUpdates(app *firebase.App) {
 			if err != nil {
 				log.Fatalf("Failed to fetch player data for player %s: %v", person.ID, err)
 			}
-			person.Currentlat = currlat.(float64)
-			person.Currentlong = currlong.(float64)
+			person.Currentlat, err = strconv.ParseFloat(fmt.Sprintf("%v", currlat), 64)
+			person.Currentlong, err = strconv.ParseFloat(fmt.Sprintf("%v", currlong), 64)
+			fmt.Println(currlat)
+			fmt.Println(currlong)
 		}
 	}
 
@@ -200,11 +205,13 @@ func (ge *GameEngine) handleMissleRequest(c echo.Context) error {
 	}
 	fmt.Println(newMissile)
 	ge.missles[newMissile.ID] = newMissile
-	ge.addOrUpdateMissleToFirestore(newMissile) 
+	ge.addOrUpdateMissleToFirestore(newMissile)
 
 	player := ge.groups[newMissile.GroupID].Players[newMissile.UserID]
-	player.Points -= 20                                               // Deduct points for firing a missile
-	ge.groups[newMissile.GroupID].Players[newMissile.UserID] = player 
+	player.Points -= 20 // Deduct points for firing a missile
+
+	// ge.groups[newMissile.GroupID].Players
+
 	ge.updatePlayerPointsInFirestore(newMissile.GroupID, newMissile.UserID, player.Points)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"msg": "MISSLE FIRED"})
