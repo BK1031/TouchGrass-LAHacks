@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:battleship_lahacks/utils/config.dart';
 import 'package:battleship_lahacks/utils/logger.dart';
 import 'package:battleship_lahacks/utils/theme.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cool_alert/cool_alert.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -79,6 +80,11 @@ class _HomePageState extends State<HomePage> {
         currentPosition = currentLocation;
       });
       log("Current Location: ${currentPosition!.latitude}, ${currentPosition!.longitude}");
+      FirebaseFirestore.instance.collection("users/${currentUser.id}/location_history").add({
+        "lat": currentPosition!.latitude,
+        "long": currentPosition!.longitude,
+        "timestamp": DateTime.now()
+      });
     });
   }
 
