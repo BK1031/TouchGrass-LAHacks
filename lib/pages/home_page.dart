@@ -7,16 +7,26 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
+import 'package:flutter/material.dart'; // Import Flutter's material library for GestureDetector
+import 'package:fluro/fluro.dart';
+
+
+
+double x = 20;
+double y1 = 700;
+double y2 = 650;
+
+bool targeting = true;
+
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-
   MapboxMapController? mapController;
   Location location = Location();
 
@@ -37,7 +47,8 @@ class _HomePageState extends State<HomePage> {
           context: context,
           type: CoolAlertType.warning,
           title: "Location Disabled",
-          widget: const Text("Please enable location access while the app is in the background to use this app!"),  //Does this ever display?
+          widget: const Text(
+              "Please enable location access while the app is in the background to use this app!"),
           confirmBtnText: "OK",
         );
         return;
@@ -51,7 +62,8 @@ class _HomePageState extends State<HomePage> {
           context: context,
           type: CoolAlertType.warning,
           title: "Location Disabled",
-          widget: const Text("Please enable location access while the app is in the background to use this app!"),  //Does this ever display?
+          widget: const Text(
+              "Please enable location access while the app is in the background to use this app!"),
           confirmBtnText: "OK",
         );
         return;
@@ -65,7 +77,8 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         currentPosition = currentLocation;
       });
-      log("Current Location: ${currentPosition!.latitude}, ${currentPosition!.longitude}");
+      log(
+          "Current Location: ${currentPosition!.latitude}, ${currentPosition!.longitude}");
     });
   }
 
@@ -81,16 +94,99 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text("Battleship"),
       ),
-      body: MapboxMap(
-        accessToken: kIsWeb ? MAPBOX_PUBLIC_TOKEN : MAPBOX_ACCESS_TOKEN,
-        onMapCreated: _onMapCreated,
-        initialCameraPosition: const CameraPosition(
-          target: LatLng(34.412278, -119.847787),
-          zoom: 14.0,
-        ),
-        // attributionButtonMargins: const Point(-32, -32),
-        myLocationEnabled: true,
-        dragEnabled: true,
+      body: Stack(
+        children: [
+          MapboxMap(
+            accessToken: kIsWeb ? MAPBOX_PUBLIC_TOKEN : MAPBOX_ACCESS_TOKEN,
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: const CameraPosition(
+              target: LatLng(34.412278, -119.847787),
+              zoom: 14.0,
+            ),
+            myLocationEnabled: true,
+            dragEnabled: true,
+          ),
+          Positioned(
+            bottom: y1-6,
+            right: x-7,
+              child: Container(
+                width: 45, // Set the width to your desired size
+                height: 45, // Set the height to your desired size
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black,
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: y2-6,
+            right: x-7,
+              child: Container(
+                width: 45, // Set the width to your desired size
+                height: 45, // Set the height to your desired size
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          Positioned(
+            bottom: y1,
+            right: x,
+            child: GestureDetector(
+              onTap: () {
+                router.navigateTo(context, "/chat", transition: TransitionType.fadeIn);
+              },
+              child: Container(
+                width: 30, // Set the width to your desired size
+                height: 30, // Set the height to your desired size
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black,
+                ),
+                child: Image.asset(
+                  "images/Chat.png",
+                  width: 50, // Set the width to match the image size
+                  height: 50, // Set the height to match the image size
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: y2+4,
+            right: x+3,
+            child: GestureDetector(
+              onTap: () {
+                mapController!.animateCamera(
+                  CameraUpdate.newLatLng(
+                    LatLng(
+                      currentPosition!.latitude!,
+                      currentPosition!.longitude!,
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                width: 23, // Set the width to your desired size
+                height: 23, // Set the height to your desired size
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black,
+                ),
+                child: Image.asset(
+                  "images/Recenter.png",
+                  width: 10, // Set the width to match the image size
+                  height: 10, // Set the height to match the image size
+                ),
+              ),
+            ),
+          ),
+          Image.asset(
+            "images/Recenter.png",
+            width: 10, // Set the width to match the image size
+            height: 10, // Set the height to match the image size
+          ),
+        ],
       ),
     );
   }

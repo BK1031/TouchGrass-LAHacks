@@ -45,7 +45,7 @@ Future<void> main() async {
 
   runApp(MaterialApp(
     title: "Battleship",
-    initialRoute: "/drawer",
+    initialRoute: "/",
     onGenerateRoute: router.generator,
     theme: darkTheme,
     darkTheme: darkTheme,
