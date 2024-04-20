@@ -23,6 +23,19 @@ class _HomePageState extends State<HomePage> {
   bool _serviceEnabled = false;
   PermissionStatus _permissionGranted = PermissionStatus.denied;
 
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getUserLocation();
+  }
+
   void _onMapCreated(MapboxMapController controller) {
     mapController = controller;
   }
@@ -70,28 +83,22 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    getUserLocation();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Battleship"),
       ),
-      body: MapboxMap(
+      body: currentPosition?.latitude != null ? MapboxMap(
         accessToken: kIsWeb ? MAPBOX_PUBLIC_TOKEN : MAPBOX_ACCESS_TOKEN,
         onMapCreated: _onMapCreated,
-        initialCameraPosition: const CameraPosition(
-          target: LatLng(34.412278, -119.847787),
+        initialCameraPosition: CameraPosition(
+          target: LatLng(currentPosition!.latitude!, currentPosition!.longitude!),
           zoom: 14.0,
         ),
         // attributionButtonMargins: const Point(-32, -32),
         myLocationEnabled: true,
         dragEnabled: true,
-      ),
+      ) : Container(),
     );
   }
 }
