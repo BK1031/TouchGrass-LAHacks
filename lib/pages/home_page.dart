@@ -6,6 +6,7 @@ import 'package:battleship_lahacks/utils/theme.dart';
 import 'package:battleship_lahacks/widgets/location_disabled_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cool_alert/cool_alert.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
@@ -25,6 +26,8 @@ class _HomePageState extends State<HomePage> {
 
   bool _serviceEnabled = false;
   PermissionStatus _permissionGranted = PermissionStatus.denied;
+
+  bool showPoints = false;
 
   @override
   void setState(fn) {
@@ -121,7 +124,7 @@ class _HomePageState extends State<HomePage> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(512)),
                       child: InkWell(
                         onTap: () {
-
+                          // setState(() => showPoints = !showPoints);
                         },
                         child: Row(
                           children: [
@@ -129,9 +132,13 @@ class _HomePageState extends State<HomePage> {
                               child: Image.network(currentUser.profilePictureURL, height: 40),
                               borderRadius: BorderRadius.circular(512),
                             ),
-                            Padding(
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeOut,
+                              width: showPoints ? 90 : 0,
+                              height: 40,
                               padding: EdgeInsets.only(left: 8, right: 16),
-                              child: Text("832 pts", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              child: showPoints ? Center(child: Text("832 pts", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))) : Container(),
                             ),
                           ],
                         ),
