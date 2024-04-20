@@ -5,6 +5,7 @@ import 'package:battleship_lahacks/models/player.dart';
 import 'package:battleship_lahacks/utils/config.dart';
 import 'package:battleship_lahacks/utils/logger.dart';
 import 'package:battleship_lahacks/utils/theme.dart';
+import 'package:battleship_lahacks/widgets/countdown_text.dart';
 import 'package:battleship_lahacks/widgets/location_disabled_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cool_alert/cool_alert.dart';
@@ -12,6 +13,7 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:location/location.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
@@ -32,6 +34,9 @@ class _HomePageState extends State<HomePage> {
 
   bool showPoints = false;
   StreamSubscription<QuerySnapshot>? currentGameListener;
+  DateTime ceasefireEnd = DateTime.now();
+
+  bool isDrawerExpanded = false;
 
   @override
   void setState(fn) {
@@ -129,7 +134,7 @@ class _HomePageState extends State<HomePage> {
         }
         setState(() {
           joinedGames.add(game);
-          if (currentGame.id == "") currentGame = game;
+          if (currentGame.id == "" || DateTime.now().isAfter(game.startTime.toLocal())) currentGame = game;
           showPoints = true;
         });
       }
@@ -143,7 +148,15 @@ class _HomePageState extends State<HomePage> {
       for (int i = 0; i < event.docs.length; i++) {
         Player playerUpdate = Player.fromJson(event.docs[i].data());
         setState(() {
-          currentGame.players[currentGame.players.indexWhere((p) => p.id == playerUpdate.id)] = playerUpdate;
+          int index = currentGame.players.indexWhere((p) => p.id == playerUpdate.id);
+          if (index < 0) {
+            // new player just joined
+            currentGame.players.add(playerUpdate);
+          } else {
+            // update existing player
+            currentGame.players[index] = playerUpdate;
+          }
+          currentGame.players.sort((p1, p2) => p2.points.compareTo(p1.points));
           joinedGames.firstWhere((g) => g.id == currentGame.id).players = currentGame.players;
         });
       }
@@ -209,6 +222,40 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  bool _canLaunchStrike() {
+
+    return true;
+  }
+
+  bool _isGameStarted() {
+    return DateTime.now().isAfter(currentGame.startTime.toLocal());
+  }
+
+  bool _isGameEnded() {
+    return DateTime.now().isAfter(currentGame.endTime.toLocal());
+  }
+
+  bool _isCeasefire() {
+    for (int i = 0; i < currentGame.settings.ceasefireHours.length; i++) {
+      DateTime t = DateTime.now();
+      DateTime start = currentGame.settings.ceasefireHours[i].start.toLocal().copyWith(month: t.month, day: t.day, year: t.year);
+      DateTime end = currentGame.settings.ceasefireHours[i].end.toLocal().copyWith(month: t.month, day: t.day, year: t.year);
+      if (t.isAfter(end) && t.isAfter(start)) {
+        start = start.add(const Duration(days: 1));
+        end = end.add(const Duration(days: 1));
+      } else if (t.isAfter(end) && t.isBefore(start)) {
+        end = end.add(const Duration(days: 1));
+      }
+      if (t.isAfter(start) && t.isBefore(end)) {
+        setState(() {
+          ceasefireEnd = end;
+        });
+        return true;
+      }
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -240,13 +287,13 @@ class _HomePageState extends State<HomePage> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(512)),
                       child: InkWell(
                         onTap: () {
-                          // setState(() => showPoints = !showPoints);
+
                         },
                         child: Row(
                           children: [
                             ClipRRect(
-                              child: Image.network(currentUser.profilePictureURL, height: 40),
                               borderRadius: BorderRadius.circular(512),
+                              child: Image.network(currentUser.profilePictureURL, height: 40),
                             ),
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
@@ -271,6 +318,119 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
+          SafeArea(
+            child: Padding(
+              padding: EdgeInsets.only(left: 8, right: 8, bottom: 86),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Visibility(
+                    visible: _isGameStarted() && !_isGameEnded() && _isCeasefire(),
+                    child: Card(
+                      color: Colors.orangeAccent,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            Text("Ceasefire active!", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            CountdownText(dateTime: ceasefireEnd, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
+                            Text("until it's over", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Visibility(
+                    visible: !_isGameStarted() && !_isGameEnded(),
+                    child: Card(
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            Text("Game has not started!", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            Padding(padding: EdgeInsets.all(2)),
+                            CountdownText(dateTime: currentGame.startTime, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.grey)),
+                            Padding(padding: EdgeInsets.all(2)),
+                            Text("until the game's afoot", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Visibility(
+            visible: currentGame.players.any((p) => p.id == currentUser.id),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, right: 8),
+                    child: Card(
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            isDrawerExpanded = !isDrawerExpanded;
+                          });
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          height: isDrawerExpanded ? 550 : 80,
+                          child: Column(
+                            children: [
+                              Icon(Icons.keyboard_arrow_up_rounded, size: 40),
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(Icons.people_alt_rounded, size: 26,),
+                                        Padding(padding: EdgeInsets.all(4)),
+                                        Text(currentGame.players.length.toString(), style: TextStyle(fontSize: 18),),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.electric_bolt_rounded, size: 26,),
+                                        Padding(padding: EdgeInsets.all(4)),
+                                        Text(currentGame.players.firstWhere((p) => p.id == currentUser.id, orElse: () => Player()).hits.toString(), style: TextStyle(fontSize: 18),),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.numbers_rounded, size: 26,),
+                                        Padding(padding: EdgeInsets.all(4)),
+                                        Text(currentGame.players.firstWhere((p) => p.id == currentUser.id, orElse: () => Player()).attempts.toString(), style: TextStyle(fontSize: 18),),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.leaderboard_rounded, size: 26,),
+                                        Padding(padding: EdgeInsets.all(4)),
+                                        Text((currentGame.players.indexWhere((p) => p.id == currentUser.id) + 1).toString(), style: TextStyle(fontSize: 18),),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
         ],
       ) : const LocationDisabledCard()
     );

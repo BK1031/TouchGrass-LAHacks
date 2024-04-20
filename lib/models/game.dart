@@ -1,5 +1,6 @@
 import 'package:battleship_lahacks/models/player.dart';
 import 'package:battleship_lahacks/utils/logger.dart';
+import 'package:intl/intl.dart';
 
 class Game {
   String id = "";
@@ -38,6 +39,7 @@ class Game {
   void debugPrint() {
     log("====== GAME DEBUG INFO ======");
     log("ID: $id – NAME: $name");
+    log("${DateFormat().format(startTime.toLocal())} – ${DateFormat().format(endTime.toLocal())}");
     log("${players.length} PLAYERS");
     int maxPoints = 0;
     int leaderHits = 0;
