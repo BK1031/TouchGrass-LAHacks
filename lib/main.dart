@@ -3,8 +3,6 @@ import 'package:battleship_lahacks/utils/config.dart';
 import 'package:battleship_lahacks/utils/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:fluro/fluro.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
