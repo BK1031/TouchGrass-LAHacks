@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "216928747953",
+    "project_id": "battleship-lahacks",
+    "storage_bucket": "battleship-lahacks.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:216928747953:android:b84a81b5c167f718cbfd90",
+        "android_client_info": {
+          "package_name": "com.bk1031.battleship_lahacks"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCFRkhNSBi4w2dKjG7k7roCfvFxRTNDaY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
