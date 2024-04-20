@@ -37,7 +37,7 @@ class _HomePageState extends State<HomePage> {
           context: context,
           type: CoolAlertType.warning,
           title: "Location Disabled",
-          widget: const Text("Please enable location access while the app is in the background to use this app!"),
+          widget: const Text("Please enable location access while the app is in the background to use this app!"),  //Does this ever display?
           confirmBtnText: "OK",
         );
         return;
@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
           context: context,
           type: CoolAlertType.warning,
           title: "Location Disabled",
-          widget: const Text("Please enable location access while the app is in the background to use this app!"),
+          widget: const Text("Please enable location access while the app is in the background to use this app!"),  //Does this ever display?
           confirmBtnText: "OK",
         );
         return;

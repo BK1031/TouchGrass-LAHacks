@@ -1,5 +1,7 @@
 import 'package:battleship_lahacks/firebase_options.dart';
 import 'package:battleship_lahacks/pages/home_page.dart';
+import 'package:battleship_lahacks/pages/chat_screen.dart';
+import 'package:battleship_lahacks/pages/drawer_test.dart';
 import 'package:battleship_lahacks/utils/config.dart';
 import 'package:battleship_lahacks/utils/logger.dart';
 import 'package:battleship_lahacks/utils/theme.dart';
@@ -34,10 +36,16 @@ Future<void> main() async {
   router.define("/", handler: Handler(handlerFunc: (BuildContext? context, Map<String, dynamic>? params) {
     return const HomePage();
   }));
+  router.define("/chat", handler: Handler(handlerFunc: (BuildContext? context, Map<String, dynamic>? params) {
+    return const Chat();
+  }));
+  router.define("/drawer", handler: Handler(handlerFunc: (BuildContext? context, Map<String, dynamic>? params) {
+    return const DrawerTest();
+  }));
 
   runApp(MaterialApp(
     title: "Battleship",
-    initialRoute: "/",
+    initialRoute: "/drawer",
     onGenerateRoute: router.generator,
     theme: darkTheme,
     darkTheme: darkTheme,
