@@ -44,6 +44,7 @@ type Missle struct {
 	Detonationtime int
 	SentTime       time.Time
 	Radius         int
+	Hits           map[string]bool
 }
 
 type Player struct {
@@ -120,8 +121,6 @@ func NewGameEngine(app *firebase.App) *GameEngine {
 			}
 			player.Currentlat, err = strconv.ParseFloat(fmt.Sprintf("%v", currlat), 64)
 			player.Currentlong, err = strconv.ParseFloat(fmt.Sprintf("%v", currlong), 64)
-			fmt.Println(currlat)
-			fmt.Println(currlong)
 
 			group.Players[playerID] = player
 		}
@@ -179,8 +178,7 @@ func (ge *GameEngine) checkUpdates(app *firebase.App) {
 			}
 			person.Currentlat, err = strconv.ParseFloat(fmt.Sprintf("%v", currlat), 64)
 			person.Currentlong, err = strconv.ParseFloat(fmt.Sprintf("%v", currlong), 64)
-			fmt.Println(currlat)
-			fmt.Println(currlong)
+
 		}
 	}
 
@@ -202,6 +200,7 @@ func (ge *GameEngine) handleMissleRequest(c echo.Context) error {
 		Detonationtime: missleReq.Detonation_time,
 		SentTime:       time.Now(),
 		Radius:         missleReq.Radius,
+		Hits:           make(map[string]bool),
 	}
 	fmt.Println(newMissile)
 	ge.missles[newMissile.ID] = newMissile
@@ -227,6 +226,7 @@ func (ge *GameEngine) checkMissleDetonation() {
 						player.Points -= 500 // Deduct points for getting hit
 						ge.groups[groupID].Players[playerID] = player
 						ge.updatePlayerPointsInFirestore(groupID, playerID, player.Points)
+						missle.Hits[playerID] = true
 					}
 				}
 			}
