@@ -89,7 +89,7 @@ class _HomePageState extends State<HomePage> {
       FirebaseFirestore.instance.collection("users/${currentUser.id}/location_history").add({
         "lat": currentPosition!.latitude,
         "long": currentPosition!.longitude,
-        "timestamp": DateTime.now().toIso8601String()
+        "timestamp": DateTime.now().toUtc().toIso8601String()
       });
     });
   }

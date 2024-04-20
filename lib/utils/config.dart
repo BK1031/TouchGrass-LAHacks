@@ -25,3 +25,5 @@ LocationData? currentPosition;
 
 Game currentGame = Game();
 List<Game> joinedGames = [];
+
+int STARTING_POINTS = 800;
