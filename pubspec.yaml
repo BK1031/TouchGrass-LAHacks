@@ -52,6 +52,7 @@ dependencies:
   percent_indicator: ^4.2.3
   intl: ^0.19.0
   board_datetime_picker: ^1.6.2
+  onesignal_flutter: ^5.1.2
 
 dev_dependencies:
   flutter_test:

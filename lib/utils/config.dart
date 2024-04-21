@@ -23,6 +23,7 @@ String LAUNCH_API_URL = "https://rmetewm.com/missile/launch";
 
 String MAPBOX_PUBLIC_TOKEN = "mapbox-public-token";
 String MAPBOX_ACCESS_TOKEN = "mapbox-access-token";
+String ONESIGNAL_TOKEN = "onesignal-token";
 
 User currentUser = User();
 LocationData? currentPosition;

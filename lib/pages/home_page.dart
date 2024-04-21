@@ -18,6 +18,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -61,6 +62,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> getUserLocation() async {
+    OneSignal.login(currentUser.id);
     location.enableBackgroundMode(enable: true);
     _serviceEnabled = await location.serviceEnabled();
     if (!_serviceEnabled) {
@@ -431,6 +433,25 @@ class _HomePageState extends State<HomePage> {
                           child: const Text("LAUNCH"),
                         ),
                       ),
+                    ),
+                  ),
+                  Visibility(
+                    visible: joinedGames.isEmpty,
+                    child: const Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(32),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(Icons.grass_rounded, size: 75, color: Colors.greenAccent,),
+                            Padding(padding: EdgeInsets.all(8)),
+                            Text("Welcome!", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+                            Padding(padding: EdgeInsets.all(4)),
+                            Text("We're excited to have you on board. Use the button at the top right to join or crate your first Touch Grass game!", style: TextStyle(fontSize: 16), textAlign: TextAlign.center,),
+                          ],
+                        ),
+                      )
                     ),
                   ),
                   Visibility(
