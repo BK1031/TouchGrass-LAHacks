@@ -16,6 +16,7 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:location/location.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
@@ -230,19 +231,46 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void blinkingMapboxCircle(int seconds, double lat, double long) async {
+    int counter = 0;
+    Timer t = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      counter++;
+      if (counter % 2 == 0) {
+        mapController?.addCircle(CircleOptions(
+          circleRadius: 25,
+          circleColor: "ff0000",
+          circleOpacity: 0.5,
+          circleStrokeColor: "ff0000",
+          circleStrokeOpacity: 1,
+          circleStrokeWidth: 5,
+          geometry: LatLng(lat, long),
+        ));
+      } else {
+        mapController?.clearCircles();
+      }
+    });
+    Future.delayed(Duration(seconds: seconds), () {
+      t.cancel();
+    });
+  }
+
   Future<void> initiateWarCrimes() async {
+    mapController?.clearCircles();
+    double targetLat = mapController!.cameraPosition!.target.latitude;
+    double targetLong = mapController!.cameraPosition!.target.longitude;
     Missile missile = Missile();
     missile.userID = currentUser.id;
     missile.gameID = currentGame.id;
-    missile.targetLat = currentPosition!.latitude!; // TODO
-    missile.targetLong = currentPosition!.longitude!; // TODO
+    missile.targetLat = targetLat;
+    missile.targetLong = targetLong;
     missile.damage = DEFAULT_DAMAGE;
     missile.radius = DEFAULT_RADIUS;
     // missile.detonationTime = DEFAULT_DETONATION_TIME + Random().nextInt(5) * 60;
-    missile.detonationTime = 20;
+    missile.detonationTime = 10;
     DocumentReference missileRef = await FirebaseFirestore.instance.collection("missiles").add(missile.toJson());
     missile.id = missileRef.id;
     await FirebaseFirestore.instance.doc("missiles/${missile.id}").update({"id": missile.id});
+    blinkingMapboxCircle(missile.detonationTime, targetLat, targetLong);
     setState(() {
       lastMissile.id = missile.id;
     });
@@ -251,17 +279,27 @@ class _HomePageState extends State<HomePage> {
 
   void listenForDeployedMissile() {
     deployedMissileListener?.cancel();
-    deployedMissileListener = FirebaseFirestore.instance.doc("missiles/${lastMissile.id}").snapshots().listen((event) {
+    deployedMissileListener = FirebaseFirestore.instance.doc("missiles/${lastMissile.id}").snapshots().listen((event) async {
       setState(() {
         lastMissile = Missile.fromJson(event.data()!);
       });
       if (lastMissile.status == "DETONATED") {
-        Future.delayed(const Duration(seconds: 5), () {
+        mapController?.clearCircles();
+        mapController?.addCircle(CircleOptions(
+          circleRadius: 40,
+          circleColor: '#ff4631',
+          circleOpacity: 0.5,
+          circleStrokeColor: '#ff1a00',
+          circleStrokeOpacity: 1,
+          circleStrokeWidth: 5,
+          geometry: LatLng(lastMissile.targetLat, lastMissile.targetLong),
+        ));
+        await Future.delayed(const Duration(seconds: 5), () {
+          mapController?.clearCircles();
           setState(() {
             lastMissile.status = "COOLDOWN";
           });
         });
-        deployedMissileListener?.cancel();
         if (lastMissile.launchTime.toLocal().add(Duration(seconds: DEFAULT_COOLDOWN)).isAfter(DateTime.now())) {
           // Still need to cooldown
           Duration duration = lastMissile.launchTime.toLocal().add(Duration(seconds: DEFAULT_COOLDOWN)).difference(DateTime.now());
@@ -271,6 +309,7 @@ class _HomePageState extends State<HomePage> {
             });
           });
         }
+        deployedMissileListener?.cancel();
       }
     });
   }
@@ -307,7 +346,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   bool _canLaunchStrike() {
-    return _isGameStarted() && !_isGameEnded() && !_isCeasefire() && !_isCooldown();
+    return _isGameStarted() && !_isGameEnded() && !_isCeasefire() && !_isCooldown() && lastMissile.status == "";
   }
 
   bool _isGameStarted() {
@@ -368,6 +407,11 @@ class _HomePageState extends State<HomePage> {
             attributionButtonMargins: const Point(-32, -32),
             myLocationEnabled: true,
             dragEnabled: true,
+            trackCameraPosition: true,
+          ),
+          Visibility(
+            visible: _canLaunchStrike(),
+            child: Center(child: Image.asset("images/crosshair.png", height: 100,))
           ),
           SafeArea(
             child: Container(
@@ -421,20 +465,22 @@ class _HomePageState extends State<HomePage> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Visibility(
-                    visible: _canLaunchStrike(),
-                    child: Center(
-                      child: SizedBox(
-                        child: CupertinoButton(
-                          onPressed: () {
-                            initiateWarCrimes();
-                          },
-                          color: Colors.redAccent,
-                          child: const Text("LAUNCH"),
-                        ),
+                  Center(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: _canLaunchStrike() ? 100 : 0,
+                      height: _canLaunchStrike() ? 90 : 0,
+                      child: CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () {
+                          initiateWarCrimes();
+                        },
+                        color: Colors.redAccent,
+                        child: const Text("LAUNCH"),
                       ),
                     ),
                   ),
+                  Padding(padding: EdgeInsets.all(8)),
                   Visibility(
                     visible: joinedGames.isEmpty,
                     child: const Card(
