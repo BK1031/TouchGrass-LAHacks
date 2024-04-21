@@ -66,8 +66,8 @@ type Player struct {
 	Currentlat  float64
 	Currentlong float64
 	Points      int64
-	Attempts    int
-	Hits        int
+	Attempts    int64
+	Hits        int64
 }
 
 type Group struct {
@@ -123,8 +123,8 @@ func NewGameEngine(app *firebase.App) *GameEngine {
 			playerID := pdoc.Ref.ID
 			player.ID = playerID
 			player.Points = pdoc.Data()["points"].(int64)
-			player.Attempts = pdoc.Data()["attempts"].(int)
-			player.Hits = pdoc.Data()["attempts"].(int)
+			player.Attempts = pdoc.Data()["attempts"].(int64)
+			player.Hits = pdoc.Data()["attempts"].(int64)
 
 			// the players data is in a different collection
 
@@ -359,7 +359,7 @@ func distance(lat1, long1, lat2, long2 float64) float64 {
 	return distance / 1000.0
 }
 
-func (ge *GameEngine) increaseAttempt(groupID, playerID string, attempts int) {
+func (ge *GameEngine) increaseAttempt(groupID, playerID string, attempts int64) {
 	//complete these
 	client, err := ge.app.Firestore(context.Background())
 	if err != nil {
@@ -376,7 +376,7 @@ func (ge *GameEngine) increaseAttempt(groupID, playerID string, attempts int) {
 
 }
 
-func (ge *GameEngine) increaseHitCount(groupID, playerID string, hits int) {
+func (ge *GameEngine) increaseHitCount(groupID, playerID string, hits int64) {
 	client, err := ge.app.Firestore(context.Background())
 	if err != nil {
 		log.Printf("Failed to get Firestore client: %v", err)
