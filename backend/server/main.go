@@ -9,6 +9,9 @@ package main
 // create a filtering system that
 // fetch ai agentverse for location reccomendations
 
+//filtering system:
+// DBSCAN: Density-Based Spatial Clustering of Applications with Noise)
+
 import (
 	"context"
 	"encoding/json"
@@ -258,7 +261,8 @@ func (ge *GameEngine) checkMissleDetonation() {
 						player.Points -= 500 // Deduct points for getting hit
 						ge.groups[groupID].Players[playerID] = player
 						ge.updatePlayerPointsInFirestore(groupID, playerID, player.Points)
-						ge.increaseHitCount(groupID, playerID, player.Hits)
+						playerSent := ge.groups[missle.GroupID].Players[missle.UserID]
+						ge.increaseHitCount(groupID, playerID, playerSent.Hits)
 						missle.Hits[playerID] = location{Lat: player.Currentlat, Long: player.Currentlong}
 					}
 				}
