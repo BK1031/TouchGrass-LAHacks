@@ -51,6 +51,10 @@ class _CreateGamePageState extends State<CreateGamePage> {
 
   Future<void> createGame() async {
     if (!endTimeEdited) return;
+    if (game.startTime.isAfter(game.endTime)) {
+      AlertService.showErrorSnackbar(context, "Start time cannot be after end time!");
+      return;
+    }
     if (game.name == "") {
       game.name = "${currentUser.firstName}'s Game";
     }

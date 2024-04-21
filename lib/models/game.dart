@@ -1,4 +1,8 @@
 import 'package:battleship_lahacks/models/player.dart';
+import 'package:battleship_lahacks/utils/logger.dart';
+import 'package:intl/intl.dart';
+
+import 'missile.dart';
 
 class Game {
   String id = "";
@@ -9,6 +13,7 @@ class Game {
   DateTime endTime = DateTime.now().toUtc();
   GameSettings settings = GameSettings();
   List<Player> players = [];
+  List<Missile> missiles = [];
 
   Game();
 
@@ -32,6 +37,25 @@ class Game {
       "end_time": endTime.toIso8601String(),
       "settings": settings.toJson()
     };
+  }
+
+  void debugPrint() {
+    log("====== GAME DEBUG INFO ======");
+    log("ID: $id – NAME: $name");
+    log("${DateFormat().format(startTime.toLocal())} – ${DateFormat().format(endTime.toLocal())}");
+    log("${players.length} PLAYERS");
+    int maxPoints = 0;
+    int leaderHits = 0;
+    int leaderAttempts = 0;
+    for (int i = 0; i < players.length; i++) {
+      if (players[i].points > maxPoints) {
+        maxPoints = players[i].points;
+        leaderHits = players[i].hits;
+        leaderAttempts = players[i].attempts;
+      }
+    }
+    log("LEADER: $maxPoints POINTS, $leaderHits HITS, $leaderAttempts ATTEMPTS");
+    log("====== =============== ======");
   }
 }
 

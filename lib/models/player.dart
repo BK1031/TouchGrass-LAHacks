@@ -12,7 +12,7 @@ class Player {
     points = json["points"] ?? 0;
     hits = json["hits"] ?? 0;
     attempts = json["attempts"] ?? 0;
-    joinDate = DateTime.tryParse(json["join_date"]) ?? DateTime.now().toUtc();
+    joinDate = DateTime.tryParse(json["join_date"] ?? "") ?? DateTime.now().toUtc();
   }
 
   Map<String, dynamic> toJson() {

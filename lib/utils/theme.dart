@@ -19,52 +19,6 @@ const darkBackgroundColor = Color(0xFF000000);
 const darkCardColor = Color(0xFF141414);
 const darkDividerColor = Color(0xFF545454);
 
-/// Light style
-final ThemeData lightTheme = ThemeData(
-  brightness: Brightness.light,
-  colorScheme: const ColorScheme.light().copyWith(
-    primary: ACCENT_COLOR,
-    secondary: ACCENT_COLOR,
-    onPrimary: Colors.white,
-    onSecondary: Colors.white,
-    surface: Colors.transparent,
-    background: lightBackgroundColor,
-    surfaceTint: Colors.transparent,
-  ),
-  fontFamily: "Product Sans",
-  primaryColor: ACCENT_COLOR,
-  scaffoldBackgroundColor: lightBackgroundColor,
-  cardColor: lightCardColor,
-  appBarTheme: AppBarTheme(
-    foregroundColor: Colors.white,
-    color: ACCENT_COLOR,
-    centerTitle: true,
-    systemOverlayStyle: SystemUiOverlayStyle.light,
-  ),
-  cardTheme: CardTheme(
-    color: lightCardColor,
-    elevation: 0,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-  ),
-  listTileTheme: ListTileThemeData(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-  ),
-  buttonTheme: ButtonThemeData(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))
-  ),
-  floatingActionButtonTheme: FloatingActionButtonThemeData(
-    backgroundColor: ACCENT_COLOR,
-    foregroundColor: Colors.white,
-  ),
-  dividerColor: lightDividerColor,
-  dialogBackgroundColor: lightCardColor,
-  popupMenuTheme: PopupMenuThemeData(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
-    ),
-  ),
-);
-
 /// Dark style
 final ThemeData darkTheme = ThemeData(
   brightness: Brightness.dark,
@@ -93,16 +47,16 @@ final ThemeData darkTheme = ThemeData(
     color: darkCardColor,
     elevation: 0,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(16),
       // side: BorderSide(color: Colors.grey)
     ),
   ),
   listTileTheme: ListTileThemeData(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     iconColor: Colors.grey,
   ),
   buttonTheme: ButtonThemeData(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
   ),
   floatingActionButtonTheme: FloatingActionButtonThemeData(
     backgroundColor: ACCENT_COLOR,
