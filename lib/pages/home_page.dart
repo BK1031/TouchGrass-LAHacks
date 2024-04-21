@@ -6,6 +6,8 @@ import 'package:battleship_lahacks/utils/config.dart';
 import 'package:battleship_lahacks/utils/logger.dart';
 import 'package:battleship_lahacks/utils/theme.dart';
 import 'package:battleship_lahacks/widgets/countdown_text.dart';
+import 'package:battleship_lahacks/widgets/drawer_preview_card.dart';
+import 'package:battleship_lahacks/widgets/drawer_summary_page.dart';
 import 'package:battleship_lahacks/widgets/location_disabled_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cool_alert/cool_alert.dart';
@@ -374,6 +376,7 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.only(left: 8, right: 8),
                     child: Card(
                       child: InkWell(
+                        splashColor: Colors.transparent,
                         onTap: () {
                           setState(() {
                             isDrawerExpanded = !isDrawerExpanded;
@@ -382,47 +385,7 @@ class _HomePageState extends State<HomePage> {
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           height: isDrawerExpanded ? 550 : 80,
-                          child: Column(
-                            children: [
-                              Icon(Icons.keyboard_arrow_up_rounded, size: 40),
-                              Expanded(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(Icons.people_alt_rounded, size: 26,),
-                                        Padding(padding: EdgeInsets.all(4)),
-                                        Text(currentGame.players.length.toString(), style: TextStyle(fontSize: 18),),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.electric_bolt_rounded, size: 26,),
-                                        Padding(padding: EdgeInsets.all(4)),
-                                        Text(currentGame.players.firstWhere((p) => p.id == currentUser.id, orElse: () => Player()).hits.toString(), style: TextStyle(fontSize: 18),),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.numbers_rounded, size: 26,),
-                                        Padding(padding: EdgeInsets.all(4)),
-                                        Text(currentGame.players.firstWhere((p) => p.id == currentUser.id, orElse: () => Player()).attempts.toString(), style: TextStyle(fontSize: 18),),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.leaderboard_rounded, size: 26,),
-                                        Padding(padding: EdgeInsets.all(4)),
-                                        Text((currentGame.players.indexWhere((p) => p.id == currentUser.id) + 1).toString(), style: TextStyle(fontSize: 18),),
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                          child: isDrawerExpanded ? DrawerSummaryPage() : const DrawerPreviewCard()
                         ),
                       ),
                     ),
