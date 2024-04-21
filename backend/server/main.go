@@ -35,6 +35,11 @@ func main() {
 
 }
 
+type location struct {
+	Lat  float64
+	Long float64
+}
+
 type Missle struct {
 	ID             string
 	UserID         string
@@ -44,7 +49,7 @@ type Missle struct {
 	Detonationtime int
 	SentTime       time.Time
 	Radius         int
-	Hits           map[string]bool
+	Hits           map[string]location
 }
 
 type Player struct {
@@ -200,7 +205,7 @@ func (ge *GameEngine) handleMissleRequest(c echo.Context) error {
 		Detonationtime: missleReq.Detonation_time,
 		SentTime:       time.Now(),
 		Radius:         missleReq.Radius,
-		Hits:           make(map[string]bool),
+		Hits:           make(map[string]location),
 	}
 	fmt.Println(newMissile)
 	ge.missles[newMissile.ID] = newMissile
@@ -222,11 +227,12 @@ func (ge *GameEngine) checkMissleDetonation() {
 		if now.After(missle.SentTime.Add(time.Duration(missle.Detonationtime) * time.Second)) {
 			for groupID, group := range ge.groups {
 				for playerID, player := range group.Players {
+					fmt.Println(distance(player.Currentlat, player.Currentlong, missle.Targetlat, missle.Targetlong))
 					if distance(player.Currentlat, player.Currentlong, missle.Targetlat, missle.Targetlong) <= float64(missle.Radius) {
 						player.Points -= 500 // Deduct points for getting hit
 						ge.groups[groupID].Players[playerID] = player
 						ge.updatePlayerPointsInFirestore(groupID, playerID, player.Points)
-						missle.Hits[playerID] = true
+						missle.Hits[playerID] = location{Lat: player.Currentlat, Long: player.Currentlong}
 					}
 				}
 			}
