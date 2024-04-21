@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 import 'package:battleship_lahacks/models/game.dart';
+import 'package:battleship_lahacks/models/missile.dart';
 import 'package:battleship_lahacks/models/player.dart';
 import 'package:battleship_lahacks/utils/config.dart';
 import 'package:battleship_lahacks/utils/logger.dart';
@@ -224,9 +226,30 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  bool _canLaunchStrike() {
+  Future<void> initiateWarCrimes() async {
+    Missile missile = Missile();
+    await FirebaseFirestore.instance.collection("auto-id").add({"timestamp": DateTime.now().toIso8601String()}).then((value) {
+      missile.id = value.id;
+    });
+    missile.userID = currentUser.id;
+    missile.gameID = currentGame.id;
+    missile.targetLat = 0.0; // TODO
+    missile.targetLong = 0.0; // TODO
+    missile.radius = DEFAULT_RADIUS;
+    missile.detonationTime = DEFAULT_DETONATION_TIME;
+    print(jsonEncode(missile));
+    try {
+      var response = await httpClient.post(Uri.parse(LAUNCH_API_URL), body: jsonEncode(missile));
+      if (response.statusCode == 200) {
+        lastMissile.id = missile.id;
+      }
+    } catch(err) {
+      log("Failed to launch: ${err}", LogLevel.error);
+    }
+  }
 
-    return true;
+  bool _canLaunchStrike() {
+    return _isGameStarted() && !_isGameEnded() && !_isCeasefire() && !_isCooldown();
   }
 
   bool _isGameStarted() {
@@ -255,6 +278,10 @@ class _HomePageState extends State<HomePage> {
         return true;
       }
     }
+    return false;
+  }
+
+  bool _isCooldown() {
     return false;
   }
 
@@ -328,6 +355,20 @@ class _HomePageState extends State<HomePage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Visibility(
+                    visible: _canLaunchStrike(),
+                    child: Center(
+                      child: SizedBox(
+                        child: CupertinoButton(
+                          onPressed: () {
+                            initiateWarCrimes();
+                          },
+                          color: Colors.redAccent,
+                          child: Text("LAUNCH"),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Visibility(
                     visible: _isGameStarted() && !_isGameEnded() && _isCeasefire(),
                     child: Card(
                       color: Colors.orangeAccent,
@@ -385,7 +426,7 @@ class _HomePageState extends State<HomePage> {
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           height: isDrawerExpanded ? 550 : 80,
-                          child: isDrawerExpanded ? DrawerSummaryPage() : const DrawerPreviewCard()
+                          child: isDrawerExpanded ? DrawerSummaryPage(currentGame: currentGame) : DrawerPreviewCard(currentGame: currentGame)
                         ),
                       ),
                     ),

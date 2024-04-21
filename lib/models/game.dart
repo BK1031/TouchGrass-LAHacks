@@ -2,6 +2,8 @@ import 'package:battleship_lahacks/models/player.dart';
 import 'package:battleship_lahacks/utils/logger.dart';
 import 'package:intl/intl.dart';
 
+import 'missile.dart';
+
 class Game {
   String id = "";
   String name = "";
@@ -11,6 +13,7 @@ class Game {
   DateTime endTime = DateTime.now().toUtc();
   GameSettings settings = GameSettings();
   List<Player> players = [];
+  List<Missile> missiles = [];
 
   Game();
 

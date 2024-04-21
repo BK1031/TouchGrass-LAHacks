@@ -6,7 +6,7 @@ class CountdownText extends StatefulWidget {
   final DateTime dateTime;
   final TextStyle style;
 
-  const CountdownText({required this.dateTime, required this.style});
+  const CountdownText({super.key, required this.dateTime, required this.style});
 
   @override
   State<CountdownText> createState() => _CountdownTextState();

@@ -1,3 +1,4 @@
+import 'package:battleship_lahacks/models/game.dart';
 import 'package:battleship_lahacks/utils/config.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,9 @@ import 'package:intl/intl.dart';
 import 'countdown_text.dart';
 
 class DrawerSummaryPage extends StatefulWidget {
-  const DrawerSummaryPage({super.key});
+  final Game currentGame;
+
+  const DrawerSummaryPage({super.key, required this.currentGame});
 
   @override
   State<DrawerSummaryPage> createState() => _DrawerSummaryPageState();
@@ -15,15 +18,16 @@ class DrawerSummaryPage extends StatefulWidget {
 
 class _DrawerSummaryPageState extends State<DrawerSummaryPage> {
 
+  int index = 0;
   int attempts = 0;
   int hits = 0;
 
   String getAccuracy() {
-    int i = currentGame.players.indexWhere((p) => p.id == currentUser.id);
-    if (i != -1 && currentGame.players[i].attempts > 0) {
+    int i = widget.currentGame.players.indexWhere((p) => p.id == currentUser.id);
+    if (i != -1 && widget.currentGame.players[i].attempts > 0) {
       setState(() {
-        attempts = currentGame.players[i].attempts;
-        hits = currentGame.players[i].hits;
+        attempts = widget.currentGame.players[i].attempts;
+        hits = widget.currentGame.players[i].hits;
       });
       return "${(hits / attempts * 100).floor()}%";
     }
@@ -34,11 +38,11 @@ class _DrawerSummaryPageState extends State<DrawerSummaryPage> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            const Icon(Icons.keyboard_arrow_down_rounded, size: 40),
-            Column(
+      child: Column(
+        children: [
+          const Icon(Icons.keyboard_arrow_down_rounded, size: 40),
+          SingleChildScrollView(
+            child: Column(
               children: [
                 Row(
                   children: [
@@ -46,12 +50,12 @@ class _DrawerSummaryPageState extends State<DrawerSummaryPage> {
                       child: Column(
                         children: [
                           Text(
-                            (currentGame.players.indexWhere((p) => p.id == currentUser.id) + 1).toString(),
-                            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                            (widget.currentGame.players.indexWhere((p) => p.id == currentUser.id) + 1).toString(),
+                            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center
                           ),
                           const Padding(padding: EdgeInsets.all(2)),
-                          Text("Leaderboard\nPosition", style: TextStyle(fontSize: 18), textAlign: TextAlign.center,),
+                          const Text("Leaderboard\nPosition", style: TextStyle(fontSize: 18), textAlign: TextAlign.center,),
                         ],
                       ),
                     ),
@@ -60,11 +64,11 @@ class _DrawerSummaryPageState extends State<DrawerSummaryPage> {
                         children: [
                           Text(
                             getAccuracy(),
-                            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center
                           ),
                           const Padding(padding: EdgeInsets.all(2)),
-                          Text("EMP\nAccuracy", style: TextStyle(fontSize: 18), textAlign: TextAlign.center,),
+                          const Text("EMP\nAccuracy", style: TextStyle(fontSize: 18), textAlign: TextAlign.center,),
                         ],
                       ),
                     )
@@ -78,11 +82,11 @@ class _DrawerSummaryPageState extends State<DrawerSummaryPage> {
                         children: [
                           Text(
                               hits.toString(),
-                              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                               textAlign: TextAlign.center
                           ),
                           const Padding(padding: EdgeInsets.all(2)),
-                          Text("Successful\nStrikes", style: TextStyle(fontSize: 18), textAlign: TextAlign.center,),
+                          const Text("Successful\nStrikes", style: TextStyle(fontSize: 18), textAlign: TextAlign.center,),
                         ],
                       ),
                     ),
@@ -91,11 +95,11 @@ class _DrawerSummaryPageState extends State<DrawerSummaryPage> {
                         children: [
                           Text(
                               attempts.toString(),
-                              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                               textAlign: TextAlign.center
                           ),
                           const Padding(padding: EdgeInsets.all(2)),
-                          Text("Attempted\nStrikes", style: TextStyle(fontSize: 18), textAlign: TextAlign.center,),
+                          const Text("Attempted\nStrikes", style: TextStyle(fontSize: 18), textAlign: TextAlign.center,),
                         ],
                       ),
                     )
@@ -105,14 +109,14 @@ class _DrawerSummaryPageState extends State<DrawerSummaryPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
+                    const Row(
                       children: [
                         Icon(Icons.directions_walk_rounded, size: 32),
-                        const Padding(padding: EdgeInsets.all(2)),
+                        Padding(padding: EdgeInsets.all(2)),
                         Text("Daily Minimum Step Count", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
                       ],
                     ),
-                    Text(currentGame.settings.stepGoal.toString(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22))
+                    Text(widget.currentGame.settings.stepGoal.toString(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22))
                   ],
                 ),
                 const Padding(padding: EdgeInsets.all(8)),
@@ -120,14 +124,14 @@ class _DrawerSummaryPageState extends State<DrawerSummaryPage> {
                   collapsedIconColor: Colors.grey,
                   childrenPadding: EdgeInsets.zero,
                   tilePadding: EdgeInsets.zero,
-                  title: Row(
+                  title: const Row(
                     children: [
                       Icon(Icons.pause_circle_filled_rounded, size: 32),
-                      const Padding(padding: EdgeInsets.all(2)),
+                      Padding(padding: EdgeInsets.all(2)),
                       Text("Ceasefire Times", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
                     ],
                   ),
-                  children: currentGame.settings.ceasefireHours.map((e) => Row(
+                  children: widget.currentGame.settings.ceasefireHours.map((e) => Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Row(
@@ -150,25 +154,25 @@ class _DrawerSummaryPageState extends State<DrawerSummaryPage> {
                     ],
                   )).toList(),
                 ),
-                DateTime.now().isBefore(currentGame.startTime) ? Card(
+                DateTime.now().isBefore(widget.currentGame.startTime) ? Card(
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        Text("Game starts in", style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal)),
-                        CountdownText(dateTime: currentGame.startTime, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.amberAccent)),
+                        const Text("Game starts in", style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal)),
+                        CountdownText(dateTime: widget.currentGame.startTime, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.amberAccent)),
                       ],
                     ),
                   ),
-                ) : DateTime.now().isAfter(currentGame.startTime) && DateTime.now().isBefore(currentGame.endTime) ? Card(
+                ) : DateTime.now().isAfter(widget.currentGame.startTime) && DateTime.now().isBefore(widget.currentGame.endTime) ? Card(
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        Text("Game ends in", style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal)),
-                        CountdownText(dateTime: currentGame.endTime, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey)),
+                        const Text("Game ends in", style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal)),
+                        CountdownText(dateTime: widget.currentGame.endTime, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey)),
                       ],
                     ),
                   ),
@@ -178,16 +182,59 @@ class _DrawerSummaryPageState extends State<DrawerSummaryPage> {
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        Text("Game ended on", style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal)),
-                        Text(DateFormat().add_yMMMd().add_jm().format(currentGame.endTime), style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.redAccent)),
+                        const Text("Game ended on", style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal)),
+                        Text(DateFormat().add_yMMMd().add_jm().format(widget.currentGame.endTime), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.redAccent)),
                       ],
                     ),
                   ),
                 ),
               ],
-            )
-          ],
-        ),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Card(
+                color: index == 0 ? Colors.white : null,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(Icons.dashboard_rounded, color: index == 0 ? Colors.black : Colors.white),
+                ),
+              ),
+              Card(
+                color: index == 1 ? Colors.white : null,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(Icons.leaderboard_rounded, color: index == 1 ? Colors.black : Colors.white),
+                ),
+              ),
+              Card(
+                color: index == 2 ? Colors.white : null,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(Icons.leaderboard_rounded, color: index == 2 ? Colors.black : Colors.white),
+                ),
+              ),
+              Card(
+                color: index == 3 ? Colors.white : null,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(Icons.leaderboard_rounded, color: index == 3 ? Colors.black : Colors.white),
+                ),
+              ),
+              Visibility(
+                visible: false,
+                child: Card(
+                  color: index == 4 ? Colors.white : null,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(Icons.admin_panel_settings_rounded, color: index == 4 ? Colors.black : Colors.white),
+                  ),
+                ),
+              )
+            ],
+          )
+        ],
       ),
     );
   }
