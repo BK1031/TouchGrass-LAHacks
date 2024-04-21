@@ -11,6 +11,7 @@ import 'package:battleship_lahacks/widgets/countdown_text.dart';
 import 'package:battleship_lahacks/widgets/drawer_preview_card.dart';
 import 'package:battleship_lahacks/widgets/drawer_summary_page.dart';
 import 'package:battleship_lahacks/widgets/location_disabled_card.dart';
+import 'package:battleship_lahacks/widgets/missile_countdown_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cool_alert/cool_alert.dart';
 import 'package:fluro/fluro.dart';
@@ -167,6 +168,7 @@ class _HomePageState extends State<HomePage> {
       }
       currentGame.debugPrint();
     });
+    listenForGameMissiles();
   }
 
   Widget _buildGameDropdown() {
@@ -202,6 +204,7 @@ class _HomePageState extends State<HomePage> {
               setState(() {
                 currentGame = joinedGames.firstWhere((g) => g.id == item);
               });
+              lastMissile = Missile();
               setupListenersForCurrentGame();
             }
           },
@@ -235,7 +238,8 @@ class _HomePageState extends State<HomePage> {
     missile.targetLong = currentPosition!.longitude!; // TODO
     missile.damage = DEFAULT_DAMAGE;
     missile.radius = DEFAULT_RADIUS;
-    missile.detonationTime = DEFAULT_DETONATION_TIME;
+    // missile.detonationTime = DEFAULT_DETONATION_TIME;
+    missile.detonationTime = 20;
     DocumentReference missileRef = await FirebaseFirestore.instance.collection("missiles").add(missile.toJson());
     missile.id = missileRef.id;
     await FirebaseFirestore.instance.doc("missiles/${missile.id}").update({"id": missile.id});
@@ -248,8 +252,53 @@ class _HomePageState extends State<HomePage> {
   void listenForDeployedMissile() {
     deployedMissileListener?.cancel();
     deployedMissileListener = FirebaseFirestore.instance.doc("missiles/${lastMissile.id}").snapshots().listen((event) {
-      lastMissile = Missile.fromJson(event.data()!);
-      print(lastMissile.status);
+      setState(() {
+        lastMissile = Missile.fromJson(event.data()!);
+      });
+      if (lastMissile.status == "DETONATED") {
+        Future.delayed(const Duration(seconds: 5), () {
+          setState(() {
+            lastMissile.status = "COOLDOWN";
+          });
+        });
+        Duration duration = lastMissile.launchTime.toLocal().add(Duration(seconds: DEFAULT_COOLDOWN)).difference(DateTime.now());
+        Future.delayed(duration, () {
+          setState(() {
+            lastMissile = Missile();
+          });
+          deployedMissileListener?.cancel();
+        });
+      }
+    });
+  }
+
+  Future<void> listenForGameMissiles() async {
+    FirebaseFirestore.instance.collection("missiles").where("game_id", isEqualTo: currentGame.id).snapshots().listen((event) {
+      for (int i = 0; i < event.size; i++) {
+        Missile missile = Missile.fromJson(event.docs[i].data());
+        int index = currentGame.missiles.indexWhere((m) => m.id == missile.id);
+        if (index > -1) {
+          currentGame.missiles[index] = missile;
+        } else {
+          currentGame.missiles.add(missile);
+        }
+        if (lastMissile.id == "" && missile.userID == currentUser.id && missile.launchTime.toLocal().difference(DateTime.now()).inSeconds < DEFAULT_COOLDOWN) {
+          setState(() {
+            lastMissile = missile;
+          });
+          if (lastMissile.status == "DETONATED") {
+            setState(() {
+              lastMissile.status = "COOLDOWN";
+            });
+            Duration duration = lastMissile.launchTime.toLocal().add(Duration(seconds: DEFAULT_COOLDOWN)).difference(DateTime.now());
+            Future.delayed(duration, () {
+              setState(() {
+                lastMissile = Missile();
+              });
+            });
+          }
+        }
+      }
     });
   }
 
@@ -280,22 +329,31 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           ceasefireEnd = end;
         });
+        print(true);
         return true;
       }
     }
+    print(false);
     return false;
   }
 
   bool _isCooldown() {
-    return false;
+    return lastMissile.status == "COOLDOWN";
+  }
+
+  MaterialAccentColor missileStatusColor(String status) {
+    if (status == "DETONATED") return Colors.redAccent;
+    else if (status == "DEPLOYED") return Colors.orangeAccent;
+    else if (status == "COOLDOWN") return Colors.amberAccent;
+    else return Colors.greenAccent;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Battleship"),
-      ),
+      // appBar: AppBar(
+      //   title: const Text("Battleship"),
+      // ),
       body: currentPosition != null ? Stack(
         children: [
           MapboxMap(
@@ -309,47 +367,49 @@ class _HomePageState extends State<HomePage> {
             myLocationEnabled: true,
             dragEnabled: true,
           ),
-          Container(
-            // color: Colors.greenAccent,
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(512)),
-                      child: InkWell(
-                        onTap: () {
+          SafeArea(
+            child: Container(
+              // color: Colors.greenAccent,
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(512)),
+                        child: InkWell(
+                          onTap: () {
 
-                        },
-                        child: Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(512),
-                              child: Image.network(currentUser.profilePictureURL, height: 40),
-                            ),
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              curve: Curves.easeOut,
-                              width: showPoints ? 90 + (currentGame.players.firstWhere((p) => p.id == currentUser.id).points % 999 > 0 ? 20 : 0) : 0,
-                              height: 40,
-                              padding: const EdgeInsets.only(left: 8, right: 16),
-                              child: showPoints ? Center(
-                                child: Text(
-                                  "${currentGame.players.firstWhere((p) => p.id == currentUser.id).points} pts",
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
-                                )
-                              ) : Container(),
-                            ),
-                          ],
+                          },
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(512),
+                                child: Image.network(currentUser.profilePictureURL, height: 40),
+                              ),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                curve: Curves.easeOut,
+                                width: showPoints ? 90 + (currentGame.players.firstWhere((p) => p.id == currentUser.id).points % 999 > 0 ? 20 : 0) : 0,
+                                height: 40,
+                                padding: const EdgeInsets.only(left: 8, right: 16),
+                                child: showPoints ? Center(
+                                  child: Text(
+                                    "${currentGame.players.firstWhere((p) => p.id == currentUser.id).points} pts",
+                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+                                  )
+                                ) : Container(),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    _buildGameDropdown()
-                  ],
-                )
-              ],
+                      _buildGameDropdown()
+                    ],
+                  )
+                ],
+              ),
             ),
           ),
           SafeArea(
@@ -369,6 +429,65 @@ class _HomePageState extends State<HomePage> {
                           },
                           color: Colors.redAccent,
                           child: Text("LAUNCH"),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Visibility(
+                    visible: _isGameStarted() && !_isGameEnded(),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      height: lastMissile.id == "" ? 50 : lastMissile.status == "DETONATED" ? 200 : 100,
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                Visibility(
+                                  visible: lastMissile.status == "DETONATED",
+                                  child: Column(
+                                    children: [
+                                      Text("Time elapsed", style: TextStyle(fontSize: 20),),
+                                      Text(
+                                        "${Duration(seconds: lastMissile.detonationTime).inMinutes.remainder(60)}m ${Duration(seconds: lastMissile.detonationTime).inSeconds.remainder(60)}s",
+                                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.grey),
+                                      ),
+                                      Padding(padding: EdgeInsets.all(4)),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.electric_bolt_rounded, size: 32, color: Colors.white,),
+                                          Padding(padding: EdgeInsets.all(4)),
+                                          Text(lastMissile.hits.length.toString(), style: TextStyle(fontSize: 20),),
+                                          Padding(padding: EdgeInsets.all(4)),
+                                          Text("Successful Hits", style: TextStyle(fontSize: 20))
+                                        ],
+                                      ),
+                                      Padding(padding: EdgeInsets.all(8)),
+                                    ],
+                                  ),
+                                ),
+                                Visibility(
+                                  visible: lastMissile.status == "DEPLOYED" || lastMissile.status == "COOLDOWN",
+                                  child: Container(
+                                    child: MissileCountdownText(
+                                      missile: lastMissile,
+                                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.grey)
+                                    ),
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text("STATUS:", style: TextStyle(fontSize: 20),),
+                                    Padding(padding: EdgeInsets.all(4)),
+                                    Text(lastMissile.status != "" ? lastMissile.status : "READY", style: TextStyle(fontSize: 20, color: missileStatusColor(lastMissile.status)))
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),

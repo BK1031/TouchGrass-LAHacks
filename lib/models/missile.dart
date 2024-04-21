@@ -25,6 +25,7 @@ class Missile {
     launchTime = DateTime.tryParse(json["launch_time"]) ?? DateTime.now().toUtc();
     status = json["status"] ?? "";
     for (int i = 0; i < json["hits"].length; i++) {
+      print(json["hits"][i]);
       hits.add(MissileHit.fromJson(json["hits"][i]));
     }
   }
@@ -57,8 +58,8 @@ class MissileHit {
 
   MissileHit.fromJson(Map<String, dynamic> json) {
     userID = json["user_id"] ?? "";
-    lat = json["lat"] ?? 0;
-    long = json["long"] ?? 0;
+    lat = json["lat"] ?? 0.0;
+    long = json["long"] ?? 0.0;
     distance = json["distance"] ?? 0;
     damage = json["damage"] ?? 0;
   }

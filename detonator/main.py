@@ -86,7 +86,7 @@ def detonate_missile(missile_id):
         user_lat = user_ref.get('current_lat')
         user_long = user_ref.get('current_long')
         # Calculate distance between missile and player
-        distance = calculate_distance((user_lat, user_long), (missile_lat, missile_long))
+        distance = int(calculate_distance((user_lat, user_long), (missile_lat, missile_long)))
         if distance <= radius:
             print("Player {} was hit by missile {} ({}m from the strike)".format(player.id, missile_id, distance))
             increment_hits(player.id, game_id)

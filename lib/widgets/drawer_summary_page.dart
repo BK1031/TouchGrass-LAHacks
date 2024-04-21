@@ -41,154 +41,156 @@ class _DrawerSummaryPageState extends State<DrawerSummaryPage> {
       child: Column(
         children: [
           const Icon(Icons.keyboard_arrow_down_rounded, size: 40),
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Text(
-                            (widget.currentGame.players.indexWhere((p) => p.id == currentUser.id) + 1).toString(),
-                            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center
-                          ),
-                          const Padding(padding: EdgeInsets.all(2)),
-                          const Text("Leaderboard\nPosition", style: TextStyle(fontSize: 18), textAlign: TextAlign.center,),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Text(
-                            getAccuracy(),
-                            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center
-                          ),
-                          const Padding(padding: EdgeInsets.all(2)),
-                          const Text("EMP\nAccuracy", style: TextStyle(fontSize: 18), textAlign: TextAlign.center,),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-                const Padding(padding: EdgeInsets.all(8)),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Text(
-                              hits.toString(),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                              (widget.currentGame.players.indexWhere((p) => p.id == currentUser.id) + 1).toString(),
                               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                               textAlign: TextAlign.center
-                          ),
-                          const Padding(padding: EdgeInsets.all(2)),
-                          const Text("Successful\nStrikes", style: TextStyle(fontSize: 18), textAlign: TextAlign.center,),
-                        ],
+                            ),
+                            const Padding(padding: EdgeInsets.all(2)),
+                            const Text("Leaderboard\nPosition", style: TextStyle(fontSize: 18), textAlign: TextAlign.center,),
+                          ],
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Text(
-                              attempts.toString(),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                              getAccuracy(),
                               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                               textAlign: TextAlign.center
-                          ),
-                          const Padding(padding: EdgeInsets.all(2)),
-                          const Text("Attempted\nStrikes", style: TextStyle(fontSize: 18), textAlign: TextAlign.center,),
+                            ),
+                            const Padding(padding: EdgeInsets.all(2)),
+                            const Text("EMP\nAccuracy", style: TextStyle(fontSize: 18), textAlign: TextAlign.center,),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                  const Padding(padding: EdgeInsets.all(8)),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                                hits.toString(),
+                                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.center
+                            ),
+                            const Padding(padding: EdgeInsets.all(2)),
+                            const Text("Successful\nStrikes", style: TextStyle(fontSize: 18), textAlign: TextAlign.center,),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                                attempts.toString(),
+                                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.center
+                            ),
+                            const Padding(padding: EdgeInsets.all(2)),
+                            const Text("Attempted\nStrikes", style: TextStyle(fontSize: 18), textAlign: TextAlign.center,),
+                          ],
+                        ),
+                      )
+                    ]
+                  ),
+                  const Padding(padding: EdgeInsets.all(16)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.directions_walk_rounded, size: 32),
+                          Padding(padding: EdgeInsets.all(2)),
+                          Text("Daily Minimum Step Count", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
                         ],
                       ),
-                    )
-                  ]
-                ),
-                const Padding(padding: EdgeInsets.all(16)),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Row(
+                      Text(widget.currentGame.settings.stepGoal.toString(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22))
+                    ],
+                  ),
+                  const Padding(padding: EdgeInsets.all(8)),
+                  ExpansionTile(
+                    collapsedIconColor: Colors.grey,
+                    childrenPadding: EdgeInsets.zero,
+                    tilePadding: EdgeInsets.zero,
+                    title: const Row(
                       children: [
-                        Icon(Icons.directions_walk_rounded, size: 32),
+                        Icon(Icons.pause_circle_filled_rounded, size: 32),
                         Padding(padding: EdgeInsets.all(2)),
-                        Text("Daily Minimum Step Count", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
+                        Text("Ceasefire Times", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
                       ],
                     ),
-                    Text(widget.currentGame.settings.stepGoal.toString(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22))
-                  ],
-                ),
-                const Padding(padding: EdgeInsets.all(8)),
-                ExpansionTile(
-                  collapsedIconColor: Colors.grey,
-                  childrenPadding: EdgeInsets.zero,
-                  tilePadding: EdgeInsets.zero,
-                  title: const Row(
-                    children: [
-                      Icon(Icons.pause_circle_filled_rounded, size: 32),
-                      Padding(padding: EdgeInsets.all(2)),
-                      Text("Ceasefire Times", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
-                    ],
+                    children: widget.currentGame.settings.ceasefireHours.map((e) => Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Row(
+                          children: [
+                            Card(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(DateFormat().add_jm().format(e.start.toLocal()), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                )
+                            ),
+                            const Text("to", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                            Card(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(DateFormat().add_jm().format(e.end.toLocal()), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                )
+                            ),
+                          ],
+                        ),
+                      ],
+                    )).toList(),
                   ),
-                  children: widget.currentGame.settings.ceasefireHours.map((e) => Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Row(
+                  DateTime.now().isBefore(widget.currentGame.startTime) ? Card(
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
                         children: [
-                          Card(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(DateFormat().add_jm().format(e.start.toLocal()), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                              )
-                          ),
-                          const Text("to", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                          Card(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(DateFormat().add_jm().format(e.end.toLocal()), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                              )
-                          ),
+                          const Text("Game starts in", style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal)),
+                          CountdownText(dateTime: widget.currentGame.startTime, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.amberAccent)),
                         ],
                       ),
-                    ],
-                  )).toList(),
-                ),
-                DateTime.now().isBefore(widget.currentGame.startTime) ? Card(
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        const Text("Game starts in", style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal)),
-                        CountdownText(dateTime: widget.currentGame.startTime, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.amberAccent)),
-                      ],
+                    ),
+                  ) : DateTime.now().isAfter(widget.currentGame.startTime) && DateTime.now().isBefore(widget.currentGame.endTime) ? Card(
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          const Text("Game ends in", style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal)),
+                          CountdownText(dateTime: widget.currentGame.endTime, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey)),
+                        ],
+                      ),
+                    ),
+                  ) : Card(
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          const Text("Game ended on", style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal)),
+                          Text(DateFormat().add_yMMMd().add_jm().format(widget.currentGame.endTime), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.redAccent)),
+                        ],
+                      ),
                     ),
                   ),
-                ) : DateTime.now().isAfter(widget.currentGame.startTime) && DateTime.now().isBefore(widget.currentGame.endTime) ? Card(
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        const Text("Game ends in", style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal)),
-                        CountdownText(dateTime: widget.currentGame.endTime, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey)),
-                      ],
-                    ),
-                  ),
-                ) : Card(
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        const Text("Game ended on", style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal)),
-                        Text(DateFormat().add_yMMMd().add_jm().format(widget.currentGame.endTime), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.redAccent)),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           Row(
