@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:fluro/fluro.dart';
 import 'package:battleship_lahacks/utils/config.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:chat_bubbles/chat_bubbles.dart';
+
 
 double crosshairSize = 125;
 //double AOE_Radius = 50;
@@ -60,8 +62,8 @@ class _PagesState extends State<Pages> {
             label: 'Map',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.text_bubble_fill),
-            label: 'Chat',
+            icon: Icon(CupertinoIcons.money_dollar),
+            label: 'Bounty',
           ),
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.person_solid),
@@ -89,7 +91,7 @@ class _PagesState extends State<Pages> {
       case 0:
         return MapPage(); // Return the MapPage widget when index is 0
       case 1:
-        return ChatPage(); // Return the ChatPage widget when index is 1
+        return BountyPage(); // Return the ChatPage widget when index is 1
       case 2:
         return ProfilePage(); // Return the ProfilePage widget when index is 2
       default:
@@ -147,8 +149,9 @@ class _MapPageState extends State<MapPage> {
   }
 
   void _onMapClick(point, latLng) {
+    if(!targeting)
+        return;
     targetPosition=latLng;
-    print(targetPosition!.latitude);
     mapController!.animateCamera(
       CameraUpdate.newLatLng(
         LatLng(
@@ -243,7 +246,7 @@ class _MapPageState extends State<MapPage> {
                       color: Colors.black,
                     ),
                     child: Icon(
-                      Icons.rocket,
+                      Icons.wifi_tethering,
                       color: Colors.white,
                       size: 45,
                     ),
@@ -295,48 +298,37 @@ class _MapPageState extends State<MapPage> {
   }
 }
 
-class ChatPage extends StatelessWidget {
+class BountyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: Colors.black, // Set background color to white
+      backgroundColor: Colors.black,
       navigationBar: CupertinoNavigationBar(
         backgroundColor: Colors.black,
-        middle: Text('Chat',
+        middle: Text(
+          'Bounty',
           style: TextStyle(
-          fontSize: 30,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-          inherit: false,
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            inherit: false,
           ),
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.only(bottom: 63, right: 8.0, left: 8.0), // Adjusted padding
+        padding: EdgeInsets.only(bottom: 63),
         child: Column(
           children: [
             Expanded(
               child: Center(
-                child: Text('Chat Page'),
-              ),
-            ),
-            CupertinoTextField(
-              cursorOpacityAnimates: true,
-              //padding: ,
-              placeholder: 'Type your message here',
-              style: TextStyle(color: Colors.white), // Change text color to white
-              decoration: BoxDecoration(
-                color: Colors.black, // Set background color to white
-                border: Border.all(
-                  color: Colors.white38, // Set border color to black
-                  width: 1.0, // Set border width
+                child: Text(
+                  'Bounty Page',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                  ),
                 ),
-                borderRadius: BorderRadius.circular(15.0), // Optional: Set border radius
               ),
-              //padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0), // Adjusted padding
-              onSubmitted: (_) {
-                // Handle message submission
-              },
             ),
           ],
         ),
@@ -348,6 +340,11 @@ class ChatPage extends StatelessWidget {
 class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    int num = 4835;
+    int num2 = 485;
+    int num1 = 4855;
+    int num3 = 45;
+    int num4 = 355;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -364,31 +361,119 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
         ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: 6,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+          child: Container(
+            height: 100, // Adjust the height of the rectangles as needed
+            decoration: BoxDecoration(
+              color: Color.fromRGBO(255, 255, 255, 0.18),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center( // Centering the text vertically and horizontally
+              child: Text(
+                '$num Points',
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  inherit: false,
+                ),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+          child: Row(
+            children: [
+              Expanded(
                 child: Container(
-                  height: 200, // Adjust the height of the rectangles as needed
+                  height: 100, // Adjust the height of the rectangles as needed
                   decoration: BoxDecoration(
                     color: Color.fromRGBO(255, 255, 255, 0.18),
                     borderRadius: BorderRadius.circular(10),
-                    boxShadow: [],
                   ),
-                  child: Center(
-                    child: SizedBox(
-                      width: double.infinity, // Ensure the graph takes full width of the container
-                      height: 150, // Adjust the height of the graph as needed
-                      child: LineChart(
-                        sampleData1(), // Use the example data method here
+                  child: Center( // Centering the text vertically and horizontally
+                    child: Text(
+                      '$num1 Steps',
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        inherit: false,
                       ),
                     ),
                   ),
                 ),
-              );
-            },
+              ),
+              SizedBox(width: 20), // Add space between the boxes
+              Expanded(
+                child: Container(
+                  height: 100, // Adjust the height of the rectangles as needed
+                  decoration: BoxDecoration(
+                    color: Color.fromRGBO(255, 255, 255, 0.18),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center( // Centering the text vertically and horizontally
+                    child: Text(
+                      '$num2 Miles',
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        inherit: false,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(//5
+          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+          child: Container(
+            height: 170, // Adjust the height of the rectangles as needed
+            decoration: BoxDecoration(
+              color: Color.fromRGBO(255, 255, 255, 0.18),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [],
+            ),
+            child: Center(
+              child: SizedBox(
+                width: double.infinity, // Ensure the graph takes full width of the container
+                height: 150, // Adjust the height of the graph as needed
+                child: LineChart(
+                  sampleData1(), // Use the example data method here
+                ),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+          child: Container(
+            height: 300, // Adjust the height of the rectangles as needed
+            decoration: BoxDecoration(
+              color: Color.fromRGBO(255, 255, 255, 0.18),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(10),
+              child: Center( // Centering the text vertically and horizontally
+                child: Text(
+                  'AI ZOrTY ZOORPS AHWOOGAHHDOOGAH sbfdsdfb sadjbf safj jgjk this is so stupid i no like. I no like because FUCK THIS SHIT. So much time to get absolutly fucking nowhere',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    inherit: false,
+                  ),
+                  overflow: TextOverflow.visible,
+                  softWrap: true,
+                ),
+              ),
+            ),
           ),
         ),
       ],

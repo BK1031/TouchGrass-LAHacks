@@ -51,6 +51,8 @@ dependencies:
   location: ^6.0.1
   http: ^1.2.1
   cool_alert: ^2.0.1
+  rotating_icon_button: ^1.0.0
+  chat_bubbles: ^1.6.0
 
 dev_dependencies:
   flutter_test:
