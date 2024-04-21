@@ -297,7 +297,70 @@ class _DrawerSummaryPageState extends State<DrawerSummaryPage> {
     return const SingleChildScrollView(
       child: Column(
         children: [
-          Text("Step Count")
+          Text(
+              "Activity",
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center
+          ),
+          Padding(padding: EdgeInsets.all(4)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.directions_walk_rounded, size: 32),
+                  Padding(padding: EdgeInsets.all(2)),
+                  Text("Daily Step Count", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
+                ],
+              ),
+              Text("4,210", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22))
+            ],
+          ),
+          Padding(padding: EdgeInsets.all(4)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.shutter_speed_rounded, size: 32),
+                  Padding(padding: EdgeInsets.all(2)),
+                  Text("Distance Traveled", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
+                ],
+              ),
+              Text("2.4 mi", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22))
+            ],
+          ),
+          Padding(padding: EdgeInsets.all(4)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.monitor_heart_rounded, size: 32),
+                  Padding(padding: EdgeInsets.all(2)),
+                  Text("Average Heart Rate", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
+                ],
+              ),
+              Text("112 BPM", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22))
+            ],
+          ),
+          Divider(height: 32),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.psychology_rounded, size: 32),
+                  Padding(padding: EdgeInsets.all(2)),
+                  Text("Insights", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
+                ],
+              ),
+            ],
+          ),
+          Text(
+            "Based on your location activity, it looks like you enjoyed playing tennis at the UCSB Tennis Courts today.  UCSB Campus Point is a beautiful location and a popular spot for UCSB students, faculty, staff and visitors.  I hope you had a chance to relax and take in the scenery as well!",
+            style: TextStyle(fontSize: 16),
+          )
         ],
       ),
     );
