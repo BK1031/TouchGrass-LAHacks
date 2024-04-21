@@ -3,14 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:location/location.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
-import 'package:flutter/material.dart'; // Import Flutter's material library for GestureDetector
-import 'package:fluro/fluro.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:fluro/fluro.dart';
-import 'package:battleship_lahacks/utils/config.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:chat_bubbles/chat_bubbles.dart';
 
 
 double crosshairSize = 125;
@@ -18,8 +12,8 @@ double crosshairSize = 125;
 
 bool targeting = false;
 LatLng? targetPosition;
-
-
+String bountyString='Many Words. Many Words. Many Words. Many Words. Many Words. Many Words. Many Words. Many Words. Many Words. Many Words. Many Words.';
+String activityString='Many Words. Many Words. Many Words. Many Words. Many Words. Many Words. Many Words. Many Words. Many Words. Many Words. Many Words.';
 
 class Pages extends StatefulWidget {
   const Pages({Key? key}) : super(key: key);
@@ -69,6 +63,10 @@ class _PagesState extends State<Pages> {
             icon: Icon(CupertinoIcons.person_solid),
             label: 'Profile',
           ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(CupertinoIcons.tree),
+          //   label: 'Explorer',
+          // ),
         ],
         onTap: (index) {
           setState(() {
@@ -94,6 +92,8 @@ class _PagesState extends State<Pages> {
         return BountyPage(); // Return the ChatPage widget when index is 1
       case 2:
         return ProfilePage(); // Return the ProfilePage widget when index is 2
+      case 3:
+        return ExplorerPage(); // Return the ProfilePage widget when index is 2
       default:
         return Container(); // Return an empty container for unknown indexes
     }
@@ -305,6 +305,7 @@ class BountyPage extends StatelessWidget {
       backgroundColor: Colors.black,
       navigationBar: CupertinoNavigationBar(
         backgroundColor: Colors.black,
+
         middle: Text(
           'Bounty',
           style: TextStyle(
@@ -321,10 +322,11 @@ class BountyPage extends StatelessWidget {
           children: [
             Expanded(
               child: Padding(
-                padding: EdgeInsets.all(10),
+                padding: EdgeInsets.all(20),
                 child: Center( // Centering the text vertically and horizontally
                   child: Text(
-                    'AI ZOrTY ZOORPS AHWOOGAHHDOOGAH sbfdsdfb sadjbf safj jgjk this is so stupid i no like. I no like because FUCK THIS SHIT. So much time to get absolutly fucking nowhere',
+                    bountyString,
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
@@ -469,7 +471,7 @@ class ProfilePage extends StatelessWidget {
               padding: EdgeInsets.all(10),
               child: Center( // Centering the text vertically and horizontally
                 child: Text(
-                  'AI ZOrTY ZOORPS AHWOOGAHHDOOGAH sbfdsdfb sadjbf safj jgjk this is so stupid i no like. I no like because FUCK THIS SHIT. So much time to get absolutly fucking nowhere',
+                  activityString,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -518,5 +520,92 @@ LineChartData sampleData1() {
   );
 }
 
-//Calorie/hr
-//locations visited
+
+
+
+class ExplorerPage extends StatefulWidget {
+  const ExplorerPage({Key? key}) : super(key: key);
+
+  @override
+  _ExplorerPageState createState() => _ExplorerPageState();
+}
+
+LatLng target = LatLng(34.412278, -119.847787);
+
+class _ExplorerPageState extends State<ExplorerPage> {
+  MapboxMapController? mapController;
+
+  void _onMapCreated(MapboxMapController controller) {
+    mapController = controller;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void updateTarget(LatLng pos) {
+    target = pos;
+
+    mapController!.animateCamera(
+      CameraUpdate.newLatLng(
+        LatLng(
+          pos.latitude,
+          pos.longitude,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          MapboxMap(
+            accessToken: 'YOUR_ACCESS_TOKEN',
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(
+              target: LatLng(34.412278, -119.847787),
+              zoom: 14.0,
+            ),
+            dragEnabled: true,
+          ),
+          Positioned(
+            bottom: 675,
+            right: 16,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    mapController!.animateCamera(
+                      CameraUpdate.newLatLng(
+                        LatLng(
+                          target.latitude,
+                          target.longitude,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.black,
+                    ),
+                    child: Icon(
+                      Icons.center_focus_strong,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
