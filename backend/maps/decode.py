@@ -61,7 +61,7 @@ def convert_to_location_names(data_array, api_key):
     return location_names
 
 # Example usage
-api_key = 'AIzaSyDnozzZIALIH0N1_1SASsOJjawiEhWS_Rc'  # Replace this with your actual Google Maps API key
+api_key = GMAPS_API_KEY_IOS  # Replace this with your actual Google Maps API key
 converted_data = convert_to_location_names(user_data, api_key)
 print(converted_data)
 
@@ -73,7 +73,7 @@ $ pip install google-generativeai
 """
 
 
-genai.configure(api_key='AIzaSyCX6hJZzwpu1cRddUug59k9gWZkvNPTscc')
+genai.configure(api_key=GEMINI_API_KEY)
 
 # Set up the model
 generation_config = {

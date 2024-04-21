@@ -14,7 +14,7 @@ lib/.env
 .history
 .svn/
 migrate_working_dir/
-
+backend/server/battleship-lahacks-firebase-adminsdk-j7rvt-06c45b06f4.json
 # IntelliJ related
 *.iml
 *.ipr
