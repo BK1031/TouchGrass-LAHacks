@@ -1,4 +1,6 @@
 import 'package:battleship_lahacks/firebase_options.dart';
+import 'package:battleship_lahacks/pages/pages.dart';
+import 'package:battleship_lahacks/pages/drawer_test.dart';
 import 'package:battleship_lahacks/pages/auth/auth_checker_page.dart';
 import 'package:battleship_lahacks/pages/auth/login_page.dart';
 import 'package:battleship_lahacks/pages/auth/register_page.dart';
@@ -41,7 +43,13 @@ Future<void> main() async {
 
   // ROUTE DEFINITIONS
   router.define("/", handler: Handler(handlerFunc: (BuildContext? context, Map<String, dynamic>? params) {
-    return const Scaffold();
+    return const Pages();
+  }));
+  // router.define("/chat", handler: Handler(handlerFunc: (BuildContext? context, Map<String, dynamic>? params) {
+  //   return const Chat();
+  // }));
+  router.define("/drawer", handler: Handler(handlerFunc: (BuildContext? context, Map<String, dynamic>? params) {
+    return const DrawerTest();
   }));
 
   router.define("/check-auth", handler: Handler(handlerFunc: (BuildContext? context, Map<String, dynamic>? params) {
@@ -74,3 +82,6 @@ Future<void> main() async {
     ],
   ),);
 }
+
+
+

@@ -22,14 +22,13 @@ import 'package:mapbox_gl/mapbox_gl.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-
   MapboxMapController? mapController;
   Location location = Location();
 
@@ -73,7 +72,8 @@ class _HomePageState extends State<HomePage> {
           context: context,
           type: CoolAlertType.warning,
           title: "Location Disabled",
-          widget: const Text("Please enable location access while the app is in the background to use this app!"),
+          widget: const Text(
+              "Please enable location access while the app is in the background to use this app!"),
           confirmBtnText: "OK",
         );
         return;
@@ -87,7 +87,8 @@ class _HomePageState extends State<HomePage> {
           context: context,
           type: CoolAlertType.warning,
           title: "Location Disabled",
-          widget: const Text("Please enable location access while the app is in the background to use this app!"),
+          widget: const Text(
+              "Please enable location access while the app is in the background to use this app!"),
           confirmBtnText: "OK",
         );
         return;
@@ -629,5 +630,28 @@ class _HomePageState extends State<HomePage> {
         ],
       ) : const LocationDisabledCard()
     );
+  }
+}
+
+
+class CirclePainter extends CustomPainter {
+  final double radius;
+
+  CirclePainter({required this.radius});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.red // Set the color of the circle here
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0; // Set the width of the circle's outline here
+
+    final center = Offset(size.width / 2, size.height / 2);
+    canvas.drawCircle(center, radius, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return false;
   }
 }
