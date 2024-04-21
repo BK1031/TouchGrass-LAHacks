@@ -9,6 +9,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluro/fluro.dart';
 import 'package:battleship_lahacks/utils/config.dart';
+import 'package:fl_chart/fl_chart.dart';
+
+double crosshairSize = 125;
+//double AOE_Radius = 50;
+
+bool targeting = false;
+LatLng? targetPosition;
+
+
 
 class Pages extends StatefulWidget {
   const Pages({Key? key}) : super(key: key);
@@ -137,6 +146,19 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
+  void _onMapClick(point, latLng) {
+    targetPosition=latLng;
+    print(targetPosition!.latitude);
+    mapController!.animateCamera(
+      CameraUpdate.newLatLng(
+        LatLng(
+          latLng.latitude,
+          latLng.longitude,
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -160,6 +182,7 @@ class _MapPageState extends State<MapPage> {
         children: [
           MapboxMap(
             accessToken: 'YOUR_ACCESS_TOKEN',
+            onMapClick: (point, latlng) => _onMapClick(point, latlng),
             onMapCreated: _onMapCreated,
             initialCameraPosition: CameraPosition(
               target: LatLng(34.412278, -119.847787),
@@ -199,6 +222,71 @@ class _MapPageState extends State<MapPage> {
                   ),
                 ),
               ],
+            ),
+          ),
+          Center(
+            child: Column(
+              children: [
+                SizedBox(height: 740), // Empty container to create offset
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      targeting = true;
+                    });
+                    // Open weapons menu
+                  },
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.black,
+                    ),
+                    child: Icon(
+                      Icons.rocket,
+                      color: Colors.white,
+                      size: 45,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Center(
+            child: targeting ? // Check if targeting is true
+            Image.asset(
+              "images/Crosshair.png",
+              width: crosshairSize, // Set the width to match the image size
+              height: crosshairSize, // Set the height to match the image size
+            ) : // If targeting is false, don't display the image
+            SizedBox(), // Use SizedBox to occupy the space without displaying anything
+          ),
+          SizedBox(
+            height: 720,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    targeting = false;
+                  });
+                },
+                child: targeting
+                    ? Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                  ),
+                  child: Image.asset(
+                    "images/Launch.png",
+                    width: 50,
+                    height: 50,
+                  ),
+                )
+                    : SizedBox(),
+              ),
             ),
           ),
         ],
@@ -264,7 +352,7 @@ class ProfilePage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Container(
-          padding: EdgeInsets.only(left: 20, right: 20, top: 20, bottom:10),
+          padding: EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 10),
           alignment: Alignment.center,
           child: Text(
             'Activity',
@@ -278,16 +366,25 @@ class ProfilePage extends StatelessWidget {
         ),
         Expanded(
           child: ListView.builder(
-            itemCount: 10, // Change this to the desired number of rectangles
+            itemCount: 6,
             itemBuilder: (context, index) {
               return Padding(
-                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20), // Adjust padding as needed
+                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                 child: Container(
-                  height: 100, // Adjust the height of the rectangles as needed
+                  height: 200, // Adjust the height of the rectangles as needed
                   decoration: BoxDecoration(
                     color: Color.fromRGBO(255, 255, 255, 0.18),
-                    borderRadius: BorderRadius.circular(10), // Set the radius for rounded corners
+                    borderRadius: BorderRadius.circular(10),
                     boxShadow: [],
+                  ),
+                  child: Center(
+                    child: SizedBox(
+                      width: double.infinity, // Ensure the graph takes full width of the container
+                      height: 150, // Adjust the height of the graph as needed
+                      child: LineChart(
+                        sampleData1(), // Use the example data method here
+                      ),
+                    ),
                   ),
                 ),
               );
@@ -299,4 +396,35 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
+LineChartData sampleData1() {
+  return LineChartData(
+    gridData: FlGridData(show: false),
+    titlesData: FlTitlesData(show: false),
+    borderData: FlBorderData(show: false),
+    minX: 0,
+    maxX: 6,
+    minY: 0,
+    maxY: 10,
+    lineBarsData: [
+      LineChartBarData(
+        spots: [
+          FlSpot(0, 3),
+          FlSpot(1, 4),
+          FlSpot(2, 3.5),
+          FlSpot(3, 5),
+          FlSpot(4, 4.5),
+          FlSpot(5, 6),
+          FlSpot(6, 8),
+        ],
+        isCurved: true,
+        //colors: [Colors.blue],
+        barWidth: 4,
+        isStrokeCapRound: true,
+        dotData: FlDotData(show: false),
+      ),
+    ],
+  );
+}
 
+//Calorie/hr
+//locations visited
