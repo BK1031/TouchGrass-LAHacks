@@ -15,7 +15,7 @@ var httpClient = http.Client();
 
 late SharedPreferences prefs;
 
-Version appVersion = Version("1.0.0+1");
+Version appVersion = Version("1.1.0+1");
 Version stableVersion = Version("1.0.0+1");
 
 // String LAUNCH_API_URL = "https://apihost.com/missile/launch";
@@ -35,4 +35,4 @@ int STARTING_POINTS = 800;
 int DEFAULT_DAMAGE = 400;
 int DEFAULT_RADIUS = 50;
 int DEFAULT_DETONATION_TIME = 300;
-int DEFAULT_COOLDOWN = 3600;
+int DEFAULT_COOLDOWN = 60;

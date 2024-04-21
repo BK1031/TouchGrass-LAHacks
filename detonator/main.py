@@ -18,7 +18,7 @@ def missile_scan():
     """
     missiles_ref = db.collection('missiles')
     missiles = missiles_ref.where(filter=FieldFilter("status", "!=", "DETONATED")).get()
-    print("Found {} not detonated missiles".format(len(missiles)))
+    # print("Found {} not detonated missiles".format(len(missiles)))
     for missile in missiles:
         launch_time = datetime.fromisoformat(missile.get('launch_time').replace('Z', '+00:00')).replace(tzinfo=None)
         detonation_time = missile.get('detonation_time') # seconds from firebase
@@ -50,6 +50,7 @@ def start_missile_listener():
                     print("New missile detected: {}".format(missile_id))
                     db.collection('missiles').document(missile_id).update({'status': 'DEPLOYED'})
                     increment_attempts(missile.to_dict()["user_id"], missile.to_dict()["game_id"])
+                    decrement_points(missile.to_dict()["user_id"], missile.to_dict()["game_id"], 150)
     
     db.collection("missiles").on_snapshot(on_snapshot)
 

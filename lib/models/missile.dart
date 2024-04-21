@@ -25,7 +25,6 @@ class Missile {
     launchTime = DateTime.tryParse(json["launch_time"]) ?? DateTime.now().toUtc();
     status = json["status"] ?? "";
     for (int i = 0; i < json["hits"].length; i++) {
-      print(json["hits"][i]);
       hits.add(MissileHit.fromJson(json["hits"][i]));
     }
   }

@@ -193,48 +193,51 @@ class _DrawerSummaryPageState extends State<DrawerSummaryPage> {
               ),
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Card(
-                color: index == 0 ? Colors.white : null,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(Icons.dashboard_rounded, color: index == 0 ? Colors.black : Colors.white),
-                ),
-              ),
-              Card(
-                color: index == 1 ? Colors.white : null,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(Icons.leaderboard_rounded, color: index == 1 ? Colors.black : Colors.white),
-                ),
-              ),
-              Card(
-                color: index == 2 ? Colors.white : null,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(Icons.leaderboard_rounded, color: index == 2 ? Colors.black : Colors.white),
-                ),
-              ),
-              Card(
-                color: index == 3 ? Colors.white : null,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(Icons.leaderboard_rounded, color: index == 3 ? Colors.black : Colors.white),
-                ),
-              ),
-              Visibility(
-                visible: false,
-                child: Card(
-                  color: index == 4 ? Colors.white : null,
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Card(
+                  color: index == 0 ? Colors.white : null,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Icon(Icons.admin_panel_settings_rounded, color: index == 4 ? Colors.black : Colors.white),
+                    child: Icon(Icons.dashboard_rounded, color: index == 0 ? Colors.black : Colors.white),
                   ),
                 ),
-              )
-            ],
+                Card(
+                  color: index == 1 ? Colors.white : null,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(Icons.leaderboard_rounded, color: index == 1 ? Colors.black : Colors.white),
+                  ),
+                ),
+                Card(
+                  color: index == 2 ? Colors.white : null,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(Icons.leaderboard_rounded, color: index == 2 ? Colors.black : Colors.white),
+                  ),
+                ),
+                Card(
+                  color: index == 3 ? Colors.white : null,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(Icons.leaderboard_rounded, color: index == 3 ? Colors.black : Colors.white),
+                  ),
+                ),
+                Visibility(
+                  visible: false,
+                  child: Card(
+                    color: index == 4 ? Colors.white : null,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Icon(Icons.admin_panel_settings_rounded, color: index == 4 ? Colors.black : Colors.white),
+                    ),
+                  ),
+                )
+              ],
+            ),
           )
         ],
       ),

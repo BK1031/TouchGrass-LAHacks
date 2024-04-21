@@ -1,12 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 import 'package:battleship_lahacks/models/game.dart';
 import 'package:battleship_lahacks/models/missile.dart';
 import 'package:battleship_lahacks/models/player.dart';
 import 'package:battleship_lahacks/utils/config.dart';
 import 'package:battleship_lahacks/utils/logger.dart';
-import 'package:battleship_lahacks/utils/theme.dart';
 import 'package:battleship_lahacks/widgets/countdown_text.dart';
 import 'package:battleship_lahacks/widgets/drawer_preview_card.dart';
 import 'package:battleship_lahacks/widgets/drawer_summary_page.dart';
@@ -18,7 +16,6 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:location/location.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
@@ -40,6 +37,7 @@ class _HomePageState extends State<HomePage> {
   bool showPoints = false;
   StreamSubscription<QuerySnapshot>? currentGameListener;
   StreamSubscription<DocumentSnapshot>? deployedMissileListener;
+  StreamSubscription<QuerySnapshot>? gameMissileListener;
   DateTime ceasefireEnd = DateTime.now();
 
   bool isDrawerExpanded = false;
@@ -238,7 +236,7 @@ class _HomePageState extends State<HomePage> {
     missile.targetLong = currentPosition!.longitude!; // TODO
     missile.damage = DEFAULT_DAMAGE;
     missile.radius = DEFAULT_RADIUS;
-    // missile.detonationTime = DEFAULT_DETONATION_TIME;
+    // missile.detonationTime = DEFAULT_DETONATION_TIME + Random().nextInt(5) * 60;
     missile.detonationTime = 20;
     DocumentReference missileRef = await FirebaseFirestore.instance.collection("missiles").add(missile.toJson());
     missile.id = missileRef.id;
@@ -261,19 +259,23 @@ class _HomePageState extends State<HomePage> {
             lastMissile.status = "COOLDOWN";
           });
         });
-        Duration duration = lastMissile.launchTime.toLocal().add(Duration(seconds: DEFAULT_COOLDOWN)).difference(DateTime.now());
-        Future.delayed(duration, () {
-          setState(() {
-            lastMissile = Missile();
+        deployedMissileListener?.cancel();
+        if (lastMissile.launchTime.toLocal().add(Duration(seconds: DEFAULT_COOLDOWN)).isAfter(DateTime.now())) {
+          // Still need to cooldown
+          Duration duration = lastMissile.launchTime.toLocal().add(Duration(seconds: DEFAULT_COOLDOWN)).difference(DateTime.now());
+          Future.delayed(duration, () {
+            setState(() {
+              lastMissile = Missile();
+            });
           });
-          deployedMissileListener?.cancel();
-        });
+        }
       }
     });
   }
 
   Future<void> listenForGameMissiles() async {
-    FirebaseFirestore.instance.collection("missiles").where("game_id", isEqualTo: currentGame.id).snapshots().listen((event) {
+    gameMissileListener?.cancel();
+    gameMissileListener = FirebaseFirestore.instance.collection("missiles").where("game_id", isEqualTo: currentGame.id).snapshots().listen((event) {
       for (int i = 0; i < event.size; i++) {
         Missile missile = Missile.fromJson(event.docs[i].data());
         int index = currentGame.missiles.indexWhere((m) => m.id == missile.id);
@@ -282,7 +284,7 @@ class _HomePageState extends State<HomePage> {
         } else {
           currentGame.missiles.add(missile);
         }
-        if (lastMissile.id == "" && missile.userID == currentUser.id && missile.launchTime.toLocal().difference(DateTime.now()).inSeconds < DEFAULT_COOLDOWN) {
+        if (lastMissile.id == "" && missile.userID == currentUser.id && missile.launchTime.toLocal().add(Duration(seconds: DEFAULT_COOLDOWN)).isAfter(DateTime.now())) {
           setState(() {
             lastMissile = missile;
           });
@@ -315,25 +317,23 @@ class _HomePageState extends State<HomePage> {
   }
 
   bool _isCeasefire() {
-    for (int i = 0; i < currentGame.settings.ceasefireHours.length; i++) {
-      DateTime t = DateTime.now();
-      DateTime start = currentGame.settings.ceasefireHours[i].start.toLocal().copyWith(month: t.month, day: t.day, year: t.year);
-      DateTime end = currentGame.settings.ceasefireHours[i].end.toLocal().copyWith(month: t.month, day: t.day, year: t.year);
-      if (t.isAfter(end) && t.isAfter(start)) {
-        start = start.add(const Duration(days: 1));
-        end = end.add(const Duration(days: 1));
-      } else if (t.isAfter(end) && t.isBefore(start)) {
-        end = end.add(const Duration(days: 1));
-      }
-      if (t.isAfter(start) && t.isBefore(end)) {
-        setState(() {
-          ceasefireEnd = end;
-        });
-        print(true);
-        return true;
-      }
-    }
-    print(false);
+    // for (int i = 0; i < currentGame.settings.ceasefireHours.length; i++) {
+    //   DateTime t = DateTime.now();
+    //   DateTime start = currentGame.settings.ceasefireHours[i].start.toLocal().copyWith(month: t.month, day: t.day, year: t.year);
+    //   DateTime end = currentGame.settings.ceasefireHours[i].end.toLocal().copyWith(month: t.month, day: t.day, year: t.year);
+    //   if (t.isAfter(end) && t.isAfter(start)) {
+    //     start = start.add(const Duration(days: 1));
+    //     end = end.add(const Duration(days: 1));
+    //   } else if (t.isAfter(end) && t.isBefore(start)) {
+    //     end = end.add(const Duration(days: 1));
+    //   }
+    //   if (t.isAfter(start) && t.isBefore(end)) {
+    //     setState(() {
+    //       ceasefireEnd = end;
+    //     });
+    //     return true;
+    //   }
+    // }
     return false;
   }
 
@@ -414,7 +414,7 @@ class _HomePageState extends State<HomePage> {
           ),
           SafeArea(
             child: Padding(
-              padding: EdgeInsets.only(left: 8, right: 8, bottom: 86),
+              padding: const EdgeInsets.only(left: 8, right: 8, bottom: 86),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -428,7 +428,7 @@ class _HomePageState extends State<HomePage> {
                             initiateWarCrimes();
                           },
                           color: Colors.redAccent,
-                          child: Text("LAUNCH"),
+                          child: const Text("LAUNCH"),
                         ),
                       ),
                     ),
@@ -448,23 +448,23 @@ class _HomePageState extends State<HomePage> {
                                   visible: lastMissile.status == "DETONATED",
                                   child: Column(
                                     children: [
-                                      Text("Time elapsed", style: TextStyle(fontSize: 20),),
+                                      const Text("Time elapsed", style: TextStyle(fontSize: 20),),
                                       Text(
                                         "${Duration(seconds: lastMissile.detonationTime).inMinutes.remainder(60)}m ${Duration(seconds: lastMissile.detonationTime).inSeconds.remainder(60)}s",
-                                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.grey),
+                                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.grey),
                                       ),
-                                      Padding(padding: EdgeInsets.all(4)),
+                                      const Padding(padding: EdgeInsets.all(4)),
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
-                                          Icon(Icons.electric_bolt_rounded, size: 32, color: Colors.white,),
-                                          Padding(padding: EdgeInsets.all(4)),
-                                          Text(lastMissile.hits.length.toString(), style: TextStyle(fontSize: 20),),
-                                          Padding(padding: EdgeInsets.all(4)),
-                                          Text("Successful Hits", style: TextStyle(fontSize: 20))
+                                          const Icon(Icons.electric_bolt_rounded, size: 32, color: Colors.white,),
+                                          const Padding(padding: EdgeInsets.all(4)),
+                                          Text(lastMissile.hits.length.toString(), style: const TextStyle(fontSize: 20),),
+                                          const Padding(padding: EdgeInsets.all(4)),
+                                          const Text("Successful Hits", style: TextStyle(fontSize: 20))
                                         ],
                                       ),
-                                      Padding(padding: EdgeInsets.all(8)),
+                                      const Padding(padding: EdgeInsets.all(8)),
                                     ],
                                   ),
                                 ),
@@ -473,15 +473,15 @@ class _HomePageState extends State<HomePage> {
                                   child: Container(
                                     child: MissileCountdownText(
                                       missile: lastMissile,
-                                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.grey)
+                                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.grey)
                                     ),
                                   ),
                                 ),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text("STATUS:", style: TextStyle(fontSize: 20),),
-                                    Padding(padding: EdgeInsets.all(4)),
+                                    const Text("STATUS:", style: TextStyle(fontSize: 20),),
+                                    const Padding(padding: EdgeInsets.all(4)),
                                     Text(lastMissile.status != "" ? lastMissile.status : "READY", style: TextStyle(fontSize: 20, color: missileStatusColor(lastMissile.status)))
                                   ],
                                 ),
@@ -501,9 +501,9 @@ class _HomePageState extends State<HomePage> {
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
                           children: [
-                            Text("Ceasefire active!", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                            CountdownText(dateTime: ceasefireEnd, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
-                            Text("until it's over", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            const Text("Ceasefire active!", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            CountdownText(dateTime: ceasefireEnd, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
+                            const Text("until it's over", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -517,11 +517,11 @@ class _HomePageState extends State<HomePage> {
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
                           children: [
-                            Text("Game has not started!", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                            Padding(padding: EdgeInsets.all(2)),
-                            CountdownText(dateTime: currentGame.startTime, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.grey)),
-                            Padding(padding: EdgeInsets.all(2)),
-                            Text("until the game's afoot", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            const Text("Game has not started!", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            const Padding(padding: EdgeInsets.all(2)),
+                            CountdownText(dateTime: currentGame.startTime, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.grey)),
+                            const Padding(padding: EdgeInsets.all(2)),
+                            const Text("until the game's afoot", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
