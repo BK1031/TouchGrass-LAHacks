@@ -38,6 +38,7 @@ class _HomePageState extends State<HomePage> {
 
   bool showPoints = false;
   StreamSubscription<QuerySnapshot>? currentGameListener;
+  StreamSubscription<DocumentSnapshot>? deployedMissileListener;
   DateTime ceasefireEnd = DateTime.now();
 
   bool isDrawerExpanded = false;
@@ -228,24 +229,28 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> initiateWarCrimes() async {
     Missile missile = Missile();
-    await FirebaseFirestore.instance.collection("auto-id").add({"timestamp": DateTime.now().toIso8601String()}).then((value) {
-      missile.id = value.id;
-    });
     missile.userID = currentUser.id;
     missile.gameID = currentGame.id;
-    missile.targetLat = 0.0; // TODO
-    missile.targetLong = 0.0; // TODO
+    missile.targetLat = currentPosition!.latitude!; // TODO
+    missile.targetLong = currentPosition!.longitude!; // TODO
+    missile.damage = DEFAULT_DAMAGE;
     missile.radius = DEFAULT_RADIUS;
     missile.detonationTime = DEFAULT_DETONATION_TIME;
-    print(jsonEncode(missile));
-    try {
-      var response = await httpClient.post(Uri.parse(LAUNCH_API_URL), body: jsonEncode(missile));
-      if (response.statusCode == 200) {
-        lastMissile.id = missile.id;
-      }
-    } catch(err) {
-      log("Failed to launch: ${err}", LogLevel.error);
-    }
+    DocumentReference missileRef = await FirebaseFirestore.instance.collection("missiles").add(missile.toJson());
+    missile.id = missileRef.id;
+    await FirebaseFirestore.instance.doc("missiles/${missile.id}").update({"id": missile.id});
+    setState(() {
+      lastMissile.id = missile.id;
+    });
+    listenForDeployedMissile();
+  }
+
+  void listenForDeployedMissile() {
+    deployedMissileListener?.cancel();
+    deployedMissileListener = FirebaseFirestore.instance.doc("missiles/${lastMissile.id}").snapshots().listen((event) {
+      lastMissile = Missile.fromJson(event.data()!);
+      print(lastMissile.status);
+    });
   }
 
   bool _canLaunchStrike() {

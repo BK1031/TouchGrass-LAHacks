@@ -32,6 +32,7 @@ List<Game> joinedGames = [];
 Missile lastMissile = Missile();
 
 int STARTING_POINTS = 800;
+int DEFAULT_DAMAGE = 400;
 int DEFAULT_RADIUS = 50;
 int DEFAULT_DETONATION_TIME = 300;
 int DEFAULT_COOLDOWN = 3600;

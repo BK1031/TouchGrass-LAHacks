@@ -5,24 +5,28 @@ class Missile {
   double targetLat = 0.0;
   double targetLong = 0.0;
   int detonationTime = 0;
+  int damage = 0;
   int radius = 0;
-  DateTime sentTime = DateTime.now().toUtc();
+  DateTime launchTime = DateTime.now().toUtc();
+  String status = "";
   List<MissileHit> hits = [];
 
   Missile();
 
   Missile.fromJson(Map<String, dynamic> json) {
-    id = json["ID"] ?? "";
-    userID = json["UserID"] ?? "";
-    gameID = json["GameID"] ?? "";
-    targetLat = json["Targetlat"] ?? 0.0;
-    targetLong = json["Targetlong"] ?? 0.0;
-    detonationTime = json["Detonationtime"] ?? 0;
-    radius = json["Radius"] ?? 0;
-    sentTime = DateTime.tryParse(json["SentTime"]) ?? DateTime.now().toUtc();
-    json["Hits"].keys.forEach((key) {
-      hits.add(MissileHit.fromJson(json["Hits"][key]));
-    });
+    id = json["id"] ?? "";
+    userID = json["user_id"] ?? "";
+    gameID = json["game_id"] ?? "";
+    targetLat = json["target_lat"] ?? 0.0;
+    targetLong = json["target_long"] ?? 0.0;
+    detonationTime = json["detonation_time"] ?? 0;
+    damage = json["damage"] ?? 0;
+    radius = json["radius"] ?? 0;
+    launchTime = DateTime.tryParse(json["launch_time"]) ?? DateTime.now().toUtc();
+    status = json["status"] ?? "";
+    for (int i = 0; i < json["hits"].length; i++) {
+      hits.add(MissileHit.fromJson(json["hits"][i]));
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -33,23 +37,29 @@ class Missile {
       "target_lat": targetLat,
       "target_long": targetLong,
       "detonation_time": detonationTime,
-      "radius": radius
+      "damage": damage,
+      "radius": radius,
+      "launch_time": launchTime.toIso8601String(),
+      "status": "",
+      "hits": hits
     };
   }
 }
 
 class MissileHit {
   String userID = "";
-  double contact_lat = 0.0;
-  double contact_long = 0.0;
+  double lat = 0.0;
+  double long = 0.0;
+  int distance = 0;
   int damage = 0;
 
   MissileHit();
 
   MissileHit.fromJson(Map<String, dynamic> json) {
-    userID = json["userID"] ?? "";
-    contact_lat = json["lat"] ?? 0;
-    contact_lat = json["long"] ?? 0;
+    userID = json["user_id"] ?? "";
+    lat = json["lat"] ?? 0;
+    long = json["long"] ?? 0;
+    distance = json["distance"] ?? 0;
     damage = json["damage"] ?? 0;
   }
 
