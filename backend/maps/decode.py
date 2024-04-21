@@ -1,43 +1,43 @@
 import requests
 import google.generativeai as genai
 
-user_data = [
-    {
-        "lat": 34.0689,  # Latitude for UCLA
-        "lon": -118.4452,  # Longitude for UCLA
-        "time": "2024-04-20T10:00:00Z"  # Example timestamp
-    },
-    {
-        "lat": 34.0522,  # Latitude for Los Angeles downtown
-        "lon": -118.2437,  # Longitude for Los Angeles downtown
-        "time": "2024-04-20T12:00:00Z"  # Another example timestamp
-    },
-    {
-        "lat": 34.0076,  # Latitude for Venice Beach
-        "lon": -118.4996,  # Longitude for Venice Beach
-        "time": "2024-04-20T14:00:00Z"  # Another example timestamp
-    },
-    {
-        "lat": 34.0522,  # Latitude for Los Angeles downtown
-        "lon": -118.2437,  # Longitude for Los Angeles downtown
-        "time": "2024-04-20T12:00:00Z"  # Another example timestamp
-    },
-    {
-        "lat": 34.0076,  # Latitude for Venice Beach
-        "lon": -118.4996,  # Longitude for Venice Beach
-        "time": "2024-04-20T14:00:00Z"  # Another example timestamp
-    },
-    {
-        "lat": 34.0522,  # Latitude for Los Angeles downtown
-        "lon": -118.2437,  # Longitude for Los Angeles downtown
-        "time": "2024-04-20T12:00:00Z"  # Another example timestamp
-    },
-    {
-        "lat": 34.0076,  # Latitude for Venice Beach
-        "lon": -118.4996,  # Longitude for Venice Beach
-        "time": "2024-04-20T14:00:00Z"  # Another example timestamp
-    }
-]
+# user_data = [
+#     {
+#         "lat": 34.0689,  # Latitude for UCLA
+#         "lon": -118.4452,  # Longitude for UCLA
+#         "time": "2024-04-20T10:00:00Z"  # Example timestamp
+#     },
+#     {
+#         "lat": 34.0522,  # Latitude for Los Angeles downtown
+#         "lon": -118.2437,  # Longitude for Los Angeles downtown
+#         "time": "2024-04-20T12:00:00Z"  # Another example timestamp
+#     },
+#     {
+#         "lat": 34.0076,  # Latitude for Venice Beach
+#         "lon": -118.4996,  # Longitude for Venice Beach
+#         "time": "2024-04-20T14:00:00Z"  # Another example timestamp
+#     },
+#     {
+#         "lat": 34.0522,  # Latitude for Los Angeles downtown
+#         "lon": -118.2437,  # Longitude for Los Angeles downtown
+#         "time": "2024-04-20T12:00:00Z"  # Another example timestamp
+#     },
+#     {
+#         "lat": 34.0076,  # Latitude for Venice Beach
+#         "lon": -118.4996,  # Longitude for Venice Beach
+#         "time": "2024-04-20T14:00:00Z"  # Another example timestamp
+#     },
+#     {
+#         "lat": 34.0522,  # Latitude for Los Angeles downtown
+#         "lon": -118.2437,  # Longitude for Los Angeles downtown
+#         "time": "2024-04-20T12:00:00Z"  # Another example timestamp
+#     },
+#     {
+#         "lat": 34.0076,  # Latitude for Venice Beach
+#         "lon": -118.4996,  # Longitude for Venice Beach
+#         "time": "2024-04-20T14:00:00Z"  # Another example timestamp
+#     }
+# ]
 
 
 def convert_to_location_names(data_array, api_key):

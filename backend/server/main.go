@@ -1,5 +1,14 @@
 package main
 
+//things to complete
+// points system for walking/calories
+// gemini api for showing users new visited locations
+// this will require a filtering algorithm to lower the workload on the llm
+// gemini api for the bounty system
+// can utilize the same filtering system
+// create a filtering system that
+// fetch ai agentverse for location reccomendations
+
 import (
 	"context"
 	"encoding/json"
@@ -28,7 +37,7 @@ func main() {
 	fb := initFirebase()
 	ge := NewGameEngine(fb)
 
-	e.POST("/missle_request", ge.handleMissleRequest)
+	e.POST("/missile_request", ge.handleMissleRequest)
 	go ge.checkMissleDetonation()
 	go ge.checkUpdates(fb)
 	e.Start(":3000")
@@ -57,6 +66,8 @@ type Player struct {
 	Currentlat  float64
 	Currentlong float64
 	Points      int64
+	Attempts    int
+	Hits        int
 }
 
 type Group struct {
@@ -69,7 +80,6 @@ type GameEngine struct {
 	app     *firebase.App
 	missles map[string]Missle
 }
-
 
 // JSON Request Body
 type SendMissleRequest struct {
@@ -113,6 +123,8 @@ func NewGameEngine(app *firebase.App) *GameEngine {
 			playerID := pdoc.Ref.ID
 			player.ID = playerID
 			player.Points = pdoc.Data()["points"].(int64)
+			player.Attempts = pdoc.Data()["attempts"].(int)
+			player.Hits = pdoc.Data()["attempts"].(int)
 
 			// the players data is in a different collection
 
@@ -126,8 +138,13 @@ func NewGameEngine(app *firebase.App) *GameEngine {
 				log.Fatalf("Failed to fetch player data for player %s: %v", playerID, err)
 			}
 			player.Currentlat, err = strconv.ParseFloat(fmt.Sprintf("%v", currlat), 64)
+			if err != nil {
+				fmt.Print(err)
+			}
 			player.Currentlong, err = strconv.ParseFloat(fmt.Sprintf("%v", currlong), 64)
-
+			if err != nil {
+				fmt.Print(err)
+			}
 			group.Players[playerID] = player
 		}
 
@@ -183,7 +200,13 @@ func (ge *GameEngine) checkUpdates(app *firebase.App) {
 				log.Fatalf("Failed to fetch player data for player %s: %v", person.ID, err)
 			}
 			person.Currentlat, err = strconv.ParseFloat(fmt.Sprintf("%v", currlat), 64)
+			if err != nil {
+				fmt.Println(err)
+			}
 			person.Currentlong, err = strconv.ParseFloat(fmt.Sprintf("%v", currlong), 64)
+			if err != nil {
+				fmt.Print(err)
+			}
 
 		}
 	}
@@ -219,6 +242,8 @@ func (ge *GameEngine) handleMissleRequest(c echo.Context) error {
 
 	ge.updatePlayerPointsInFirestore(newMissile.GroupID, newMissile.UserID, player.Points)
 
+	ge.increaseAttempt(newMissile.GroupID, newMissile.UserID, player.Attempts)
+
 	return c.JSON(http.StatusOK, map[string]interface{}{"msg": "MISSLE FIRED"})
 }
 
@@ -233,6 +258,7 @@ func (ge *GameEngine) checkMissleDetonation() {
 						player.Points -= 500 // Deduct points for getting hit
 						ge.groups[groupID].Players[playerID] = player
 						ge.updatePlayerPointsInFirestore(groupID, playerID, player.Points)
+						ge.increaseHitCount(groupID, playerID, player.Hits)
 						missle.Hits[playerID] = location{Lat: player.Currentlat, Long: player.Currentlong}
 					}
 				}
@@ -281,7 +307,7 @@ func getDocument(client *firestore.Client, collection string, docID string) *fir
 }
 
 // Adds or updates a missile in Firestore
-func (ge *GameEngine) addOrUpdateMissleToFirestore(missle Missle) { //TODO:
+func (ge *GameEngine) addOrUpdateMissleToFirestore(missle Missle) {
 	client, err := ge.app.Firestore(context.Background())
 	if err != nil {
 		log.Printf("Failed to get Firestore client: %v", err)
@@ -330,5 +356,38 @@ func distance(lat1, long1, lat2, long2 float64) float64 {
 
 	distance := earthRadiusKm * c
 
-	return distance
+	return distance / 1000.0
+}
+
+func (ge *GameEngine) increaseAttempt(groupID, playerID string, attempts int) {
+	//complete these
+	client, err := ge.app.Firestore(context.Background())
+	if err != nil {
+		log.Printf("Failed to get Firestore client: %v", err)
+		return
+	}
+	defer client.Close()
+	_, err = client.Collection("games").Doc(groupID).Collection("players").Doc(playerID).Update(context.Background(), []firestore.Update{
+		{Path: "attempts", Value: attempts + 1},
+	})
+	if err != nil {
+		log.Printf("Failed to update player attempts: %v", err)
+	}
+
+}
+
+func (ge *GameEngine) increaseHitCount(groupID, playerID string, hits int) {
+	client, err := ge.app.Firestore(context.Background())
+	if err != nil {
+		log.Printf("Failed to get Firestore client: %v", err)
+		return
+	}
+	defer client.Close()
+	_, err = client.Collection("games").Doc(groupID).Collection("players").Doc(playerID).Update(context.Background(), []firestore.Update{
+		{Path: "hits", Value: hits + 1},
+	})
+	if err != nil {
+		log.Printf("Failed to update player hits: %v", err)
+	}
+
 }
