@@ -320,12 +320,19 @@ class BountyPage extends StatelessWidget {
         child: Column(
           children: [
             Expanded(
-              child: Center(
-                child: Text(
-                  'Bounty Page',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
+              child: Padding(
+                padding: EdgeInsets.all(10),
+                child: Center( // Centering the text vertically and horizontally
+                  child: Text(
+                    'AI ZOrTY ZOORPS AHWOOGAHHDOOGAH sbfdsdfb sadjbf safj jgjk this is so stupid i no like. I no like because FUCK THIS SHIT. So much time to get absolutly fucking nowhere',
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      inherit: false,
+                    ),
+                    overflow: TextOverflow.visible,
+                    softWrap: true,
                   ),
                 ),
               ),
