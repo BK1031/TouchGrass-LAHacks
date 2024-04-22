@@ -1,3 +1,5 @@
+### Touch Grass is a fun and interactive mobile app that promotes fitness and the outdoors. With the app, friends can send "attacks" to force each other out of houses and buildings to touch grass.
+
 ## Inspiration
 We were inspired by the board game Battleship as well as some mobile games like Pokemon Go.
 
